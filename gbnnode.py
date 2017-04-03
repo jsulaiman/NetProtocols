@@ -89,6 +89,7 @@ def launchNode(self_port, peer_port, window_size, emulation_mode, emulation_valu
         send_packets_in_window()
         start_timer()
     # Wait for incoming ack for 500msec                    
+    
     def start_timer():
         #Give the message a bit of time to reach the target
         time.sleep(0.02)
@@ -168,10 +169,13 @@ def launchNode(self_port, peer_port, window_size, emulation_mode, emulation_valu
                                 release_printer()
                         
                             else:
-                                timerOn=False
-                                reserve_printer()
-                                print("[%s] ACK%d received, window moves to %d" %(time.time(), message["sequence"],message["sequence"]))
-                                release_printer()
+                                
+                                if((int(message["sequence"])-1)==baseseqnum): 
+                                    timerOn=False
+                                    reserve_printer()
+                                    print("[%s] ACK%d received, window moves to %d" %(time.time(), message["sequence"],message["sequence"]))
+                                    release_printer()
+                                    baseseqnum=baseseqnum+1
                 #except:
                 #    print ("[Exception: Cannot deliver an incoming chat transmission]")
         

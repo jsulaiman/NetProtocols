@@ -67,7 +67,7 @@ def launchNode(self_port, peer_port, window_size, emulation_mode, emulation_valu
         global stopSending
         basebuffer=baseseqnum
 
-        while nextseqnum <= bufferLength:
+        while nextseqnum < bufferLength:
             if nextseqnum < (basebuffer + window_size):
                 reserve_printer()
                 #print "base in send ", baseseqnum
@@ -84,6 +84,21 @@ def launchNode(self_port, peer_port, window_size, emulation_mode, emulation_valu
                 nextseqnum = nextseqnum + 1  
             else:
                 stopSending = True 
+
+    def send_new_packet():
+        global baseseqnum
+        global nextseqnum
+        newSeqInWindow=baseseqnum+window_size-1
+        
+        print("newSeq: %d, bufferLength: %d" %(newSeqInWindow,bufferLength))
+        if newSeqInWindow <bufferLength:
+            reserve_printer()
+            #print "base in send ", baseseqnum
+            #print "next in send", nextseqnum
+            #print "window", window_size
+            print("[%s] packet%d %s sent" % (repr(time.time()), buffer[newSeqInWindow]["sequence"], buffer[newSeqInWindow]["data"]))
+            senderSideSocket.sendto(json.dumps(buffer[newSeqInWindow]), (self_ip, int(peer_port)))
+            release_printer()
 
 
           
@@ -184,7 +199,8 @@ def launchNode(self_port, peer_port, window_size, emulation_mode, emulation_valu
                                     reserve_printer()
                                     print("[%s] ACK%d received, window moves to %d" % (repr(time.time()), message["sequence"], baseseqnum))
                                     release_printer()
-                                    #send_packets_in_window()
+                                    time.sleep(0.01)
+                                    send_new_packet()
                                 elif((int(message["sequence"])) > baseseqnum):
                                     for i in buffer:
                                         if i["sequence"]==message["sequence"]:

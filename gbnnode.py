@@ -18,6 +18,8 @@ readyToPrint = True
 baseseqnum = 0
 nextseqnum = 0
 expectedseqnum = 0
+bufferLength = 0
+stopSending = False
 buffer = []
     
     
@@ -52,8 +54,6 @@ def validate_args_length(arg):
                 
 # Launch sender node
 def launchNode(self_port, peer_port, window_size, emulation_mode, emulation_value):
-
-    bufferLength = 0
     
     # Create a UDP datagram socket for the client
     senderSideSocket = socket(AF_INET, SOCK_DGRAM)
@@ -64,32 +64,28 @@ def launchNode(self_port, peer_port, window_size, emulation_mode, emulation_valu
     def send_packets_in_window():
         global baseseqnum
         global nextseqnum
-        stopSending = False
+        global stopSending
         basebuffer=baseseqnum
-        
-        try:
-            while nextseqnum != bufferLength and stopSending == False:
-                if nextseqnum < (basebuffer + window_size):
-                    reserve_printer()
-                    #print "base in send ", baseseqnum
-                    #print "next in send", nextseqnum
-                    #print "window", window_size
-                    print("[%s] packet%d %s sent" % (repr(time.time()), buffer[nextseqnum]["sequence"], buffer[nextseqnum]["data"]))
-                    senderSideSocket.sendto(json.dumps(buffer[nextseqnum]), (self_ip, int(peer_port)))
-                    release_printer()
-                    
-                    if(baseseqnum == nextseqnum):
-                        #thread.start_new_thread(start_timer, (buffer[nextseqnum]["sequence"],))
-                        threadTimer = threading.Thread(target=start_timer,args=(buffer[nextseqnum]["sequence"],))
-                        threadTimer.start()
-                    nextseqnum = nextseqnum + 1   
-                else:
-                    stopSending = True
-                    print ("in send packet else")
-                    return True 
-        except:
-            print "in send packet expection"
-            1;
+
+        while nextseqnum <= bufferLength:
+            if nextseqnum < (basebuffer + window_size):
+                reserve_printer()
+                #print "base in send ", baseseqnum
+                #print "next in send", nextseqnum
+                #print "window", window_size
+                print("[%s] packet%d %s sent" % (repr(time.time()), buffer[nextseqnum]["sequence"], buffer[nextseqnum]["data"]))
+                senderSideSocket.sendto(json.dumps(buffer[nextseqnum]), (self_ip, int(peer_port)))
+                release_printer()
+                
+                if(baseseqnum == nextseqnum):
+                    #thread.start_new_thread(start_timer, (buffer[nextseqnum]["sequence"],))
+                    threadTimer = threading.Thread(target=start_timer,args=(buffer[nextseqnum]["sequence"],))
+                    threadTimer.start()
+                nextseqnum = nextseqnum + 1  
+            else:
+                stopSending = True 
+
+
           
     def process_timeout(pktNum):
         
@@ -109,11 +105,14 @@ def launchNode(self_port, peer_port, window_size, emulation_mode, emulation_valu
         t_start = time.time()
         t_end = time.time() + 0.5
         reserve_printer()
-        print "in timer %d [%s]" % (pktNum, t_end)
+        #print "in timer %d [%s]" % (pktNum, t_end)
         release_printer()
         while t_start < t_end:
-                
+                reserve_printer()
+                #print "in timer %d [%s]" % (pktNum, t_start)
+                release_printer()
                 t_start = t_start + .01
+                time.sleep(0.01)
                 if(timerOn == False):
                     # Reset buffer
                     return True;
@@ -130,12 +129,15 @@ def launchNode(self_port, peer_port, window_size, emulation_mode, emulation_valu
         global baseseqnum
         global nextseqnum
         global expectedseqnum
+        global bufferLength
+        
         while True:
             incomingPacket = None
             try:
                 incomingPacket, (senderIp, senderPort) = senderSideSocket.recvfrom(1024)
             except:
                 time.sleep(0.01)
+                print ("waiting")
             
             # Ignores packets sent from self
             if senderPort == self_port:
@@ -144,7 +146,7 @@ def launchNode(self_port, peer_port, window_size, emulation_mode, emulation_valu
             elif incomingPacket:
                 # try:
                     message = json.loads(incomingPacket)
-                    #####print ("in get_message, capturing incoming msg", message)
+                    #print ("in get_message, capturing incoming msg", message)
                     # Check if it is a packet containing acknowledgment of a previously sent packet    
 
                     # RECEIVER SECTION
@@ -172,28 +174,39 @@ def launchNode(self_port, peer_port, window_size, emulation_mode, emulation_valu
                     # SENDER SECTION
                     # Process incoming Ack as Sender
                     else:
-                        # Emulate packet loss
+                        # Process ACK, move window as appropriate
                         if emulation_mode == "-d":                        
                             if ((int(message["sequence"]) == 0 or (int(message["sequence"]) % int(emulation_value)) != 0)):
-                
+                                #print "ACK received is %d, Next is: %d, base is: %d" %(message["sequence"],nextseqnum,baseseqnum)
                                 if((int(message["sequence"])) == baseseqnum): 
                                     timerOn = False
                                     baseseqnum = baseseqnum + 1
                                     reserve_printer()
                                     print("[%s] ACK%d received, window moves to %d" % (repr(time.time()), message["sequence"], baseseqnum))
                                     release_printer()
+                                    #send_packets_in_window()
+                                elif((int(message["sequence"])) > baseseqnum):
+                                    for i in buffer:
+                                        if i["sequence"]==message["sequence"]:
+                                            buffer.pop()
+                                            bufferLength=bufferLength-1
+                                            print buffer
+                                #elif nextseqnum < (basebuffer + window_size):
                                     
+                            # Emulate packet loss
                             else:
                                 reserve_printer()
                                 print("[%s] ACK%d discarded" % (repr(time.time()), message["sequence"]))
                                 release_printer()
+                        else:
+                            1;
+                            #print "ACK received is %d, Expected is: %d" %(message["sequence"],expectedseqnum)
                 # except:
                 #    print ("[Exception: Cannot deliver an incoming chat transmission]")
         
 
     global timerOn
-    disableMsg = "no"
-    
+    global bufferLength
     #thread.start_new_thread(receiver_processing, ())
     threadReceiver = threading.Thread(target=receiver_processing)
     threadReceiver.start()
@@ -213,7 +226,13 @@ def launchNode(self_port, peer_port, window_size, emulation_mode, emulation_valu
         bufferLength = bufferLength + 1
         buffer.append(packetWithHeader)
     
-    send_packets_in_window()
+    firstThread = threading.Thread(target=send_packets_in_window)
+    firstThread.start()
+    
+    while stopSending == False:
+        time.sleep(0.01)
+        
+    firstThread.join()
 
                     
     

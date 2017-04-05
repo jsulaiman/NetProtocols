@@ -22,6 +22,8 @@ Every packet contains one character in the data section. It also contains a head
 ACKs are sent back to the sender from the receiver, with the data section containing null.
 
 At the start of the program the entries inputted by the user using the <send> command is placed in a buffer.
+
+The program utilizes multithreading; one thread to listen for incoming packets, and another to perform timeout and sending/resending mechanism.
 USAGE SCENARIOS
 
 ALGORITHM AND DATA STRUCTURES EXPLANATION
@@ -42,3 +44,4 @@ https://docs.python.org/2/howto/sockets.html
 https://www.howtoforge.com/tutorial/install-git-and-github-on-ubuntu-14.04/
 JSON versus XML: http://www.json.org/xml.html
 Encoding and decoding JSON in Python: https://pythonspot.com/json-encoding-and-decoding-with-python/
+Python multithreading tutorial: https://pymotw.com/2/threading/	

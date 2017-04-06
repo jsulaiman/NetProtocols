@@ -183,14 +183,23 @@ def launchNode(self_port, peer_port, window_size, emulation_mode, emulation_valu
                                 reserve_printer()
                                 print("[%s] packet%d %s received" % (repr(time.time()), message["sequence"], message["data"]))
                                 release_printer()
+                                packetCount=packetCount+1
                                 
-                                receivedSequence = message["sequence"]
-                                expectedseqnum = message["sequence"] + 1
-                                message["data"] = None
-                                senderSideSocket.sendto(json.dumps(message), (self_ip, int(peer_port)))
-                                reserve_printer()
-                                print("[%s] ACK%d sent, expecting packet%s" % (repr(time.time()), receivedSequence, expectedseqnum))
-                                release_printer()
+                                if message["fin"]== "yes":
+                                    message["data"] = None
+                                    senderSideSocket.sendto(json.dumps(message), (self_ip, int(peer_port)))
+                                    reserve_printer()
+                                    print ("[Summary] %d/%d packets dropped, loss rate = %d%%" %(lostPacketCounter,packetCount,lostPacketCounter*100/packetCount))
+                                    release_printer()
+                                    sys.exit()
+                                else:
+                                    receivedSequence = message["sequence"]
+                                    expectedseqnum = message["sequence"] + 1
+                                    message["data"] = None
+                                    senderSideSocket.sendto(json.dumps(message), (self_ip, int(peer_port)))
+                                    reserve_printer()
+                                    print("[%s] ACK%d sent, expecting packet%s" % (repr(time.time()), receivedSequence, expectedseqnum))
+                                    release_printer()
                     
                     # SENDER SECTION
                     # Process incoming Ack as Sender
@@ -200,7 +209,10 @@ def launchNode(self_port, peer_port, window_size, emulation_mode, emulation_valu
                             
                             if ((int(message["sequence"]) == 0 or (int(message["sequence"]) % int(emulation_value)) != 0)):
                                 if message["fin"]== "yes":
+                                    
+                                    reserve_printer()
                                     print ("[Summary] %d/%d packets discarded, loss rate = %d%%" %(lostPacketCounter,packetCount,lostPacketCounter*100/packetCount))
+                                    release_printer()
                                     sys.exit()
                                 
                                 #print "ACK received is %d, Next is: %d, base is: %d" %(message["sequence"],nextseqnum,baseseqnum)

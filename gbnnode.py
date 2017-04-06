@@ -20,6 +20,8 @@ nextseqnum = 0
 expectedseqnum = 0
 bufferLength = 0
 stopSending = False
+lostPacketCounter = 0
+packetCount = 0
 buffer = []
     
     
@@ -99,6 +101,8 @@ def launchNode(self_port, peer_port, window_size, emulation_mode, emulation_valu
             print("[%s] packet%d %s sent" % (repr(time.time()), buffer[newSeqInWindow]["sequence"], buffer[newSeqInWindow]["data"]))
             senderSideSocket.sendto(json.dumps(buffer[newSeqInWindow]), (self_ip, int(peer_port)))
             release_printer()
+            #print buffer[newSeqInWindow]
+            
 
 
           
@@ -145,6 +149,8 @@ def launchNode(self_port, peer_port, window_size, emulation_mode, emulation_valu
         global nextseqnum
         global expectedseqnum
         global bufferLength
+        global lostPacketCounter
+        global packetCount
         
         while True:
             incomingPacket = None
@@ -191,7 +197,12 @@ def launchNode(self_port, peer_port, window_size, emulation_mode, emulation_valu
                     else:
                         # Process ACK, move window as appropriate
                         if emulation_mode == "-d":                        
+                            
                             if ((int(message["sequence"]) == 0 or (int(message["sequence"]) % int(emulation_value)) != 0)):
+                                if message["fin"]== "yes":
+                                    print ("[Summary] %d/%d packets discarded, loss rate = %d%%" %(lostPacketCounter,packetCount,lostPacketCounter*100/packetCount))
+                                    sys.exit()
+                                
                                 #print "ACK received is %d, Next is: %d, base is: %d" %(message["sequence"],nextseqnum,baseseqnum)
                                 if((int(message["sequence"])) == baseseqnum): 
                                     timerOn = False
@@ -223,6 +234,8 @@ def launchNode(self_port, peer_port, window_size, emulation_mode, emulation_valu
 
     global timerOn
     global bufferLength
+    global lostPacketCounter
+    global packetCount
     #thread.start_new_thread(receiver_processing, ())
     threadReceiver = threading.Thread(target=receiver_processing)
     threadReceiver.start()
@@ -238,10 +251,12 @@ def launchNode(self_port, peer_port, window_size, emulation_mode, emulation_valu
     
     # Put all packets with sequence numbers in the buffer
     for i in packets:
-        packetWithHeader = {"sequence": bufferLength, "data": i}
+        packetWithHeader = {"sequence": bufferLength, "data": i, "fin": ""}
         bufferLength = bufferLength + 1
         buffer.append(packetWithHeader)
     
+    packetCount = bufferLength
+    buffer[(bufferLength-1)]["fin"]= "yes"
     firstThread = threading.Thread(target=send_packets_in_window)
     firstThread.start()
     

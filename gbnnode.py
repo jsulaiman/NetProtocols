@@ -3,11 +3,11 @@ import select
 from socket import *
 import sys
 import time
-#import thread
 import threading
 import os
 import json
-# from datetime import datetime
+import random
+
 
 # A list of global variables to be used throughout the GBN program
 argList = []  # Argument parser
@@ -92,7 +92,7 @@ def launchNode(self_port, peer_port, window_size, emulation_mode, emulation_valu
         global nextseqnum
         newSeqInWindow=baseseqnum+window_size-1
         
-        print("newSeq: %d, bufferLength: %d" %(newSeqInWindow,bufferLength))
+        #print("newSeq: %d, bufferLength: %d" %(newSeqInWindow,bufferLength))
         if newSeqInWindow <bufferLength:
             reserve_printer()
             #print "base in send ", baseseqnum
@@ -102,8 +102,6 @@ def launchNode(self_port, peer_port, window_size, emulation_mode, emulation_valu
             senderSideSocket.sendto(json.dumps(buffer[newSeqInWindow]), (self_ip, int(peer_port)))
             release_printer()
             #print buffer[newSeqInWindow]
-            
-
 
           
     def process_timeout(pktNum):
@@ -169,16 +167,34 @@ def launchNode(self_port, peer_port, window_size, emulation_mode, emulation_valu
                     message = json.loads(incomingPacket)
                     #print ("in get_message, capturing incoming msg", message)
                     # Check if it is a packet containing acknowledgment of a previously sent packet    
-
+                    
+                    probabilisticallyDropped = False
+                    deterministicValue = 9999999999999999999 #Ensure that modulo of this number is always going to be a non zero
+                        
                     # RECEIVER SECTION
                     # Process incoming packet as Receiver
                     if(message["data"] != None and expectedseqnum==message["sequence"]):
                         
+                        if emulation_mode == "-p":
+                            emulProb=float(emulation_value)
+                            if emulProb > 0:
+                                random_number = float(random.random())
+                                
+                                if random_number < emulProb:
+                                    probabilisticallyDropped = True
+                        
+                    
                         if emulation_mode == "-d":
-                            if ((int(message["sequence"] + 1) % int(emulation_value)) == 0):
+                            deterministicValue = emulation_value
+                                
+                        if (emulation_mode == "-d" or emulation_mode == "-p"):
+                            if (((int(message["sequence"] + 1) % int(deterministicValue)) == 0) or probabilisticallyDropped==True):
                                 reserve_printer()
+                                print ("modulo: %d, prob drop: %s" %((int(message["sequence"] + 1) % int(deterministicValue)),probabilisticallyDropped))
                                 print("[%s] packet%d %s discarded" % (repr(time.time()), message["sequence"], message["data"]))
                                 release_printer()
+                                lostPacketCounter=lostPacketCounter+1
+                                packetCount=packetCount+1
                             else:
                                 reserve_printer()
                                 print("[%s] packet%d %s received" % (repr(time.time()), message["sequence"], message["data"]))
@@ -204,16 +220,25 @@ def launchNode(self_port, peer_port, window_size, emulation_mode, emulation_valu
                     # SENDER SECTION
                     # Process incoming Ack as Sender
                     else:
+                        
                         # Process ACK, move window as appropriate
-                        if emulation_mode == "-d":                        
+                        if emulation_mode == "-p":
+                            if emulation_value > 0:
+                                random_number = random.random()
+                                if random_number < emulation_value:
+                                    probabilisticallyDropped = True
+                                
+                        if emulation_mode == "-d":
+                            deterministicValue = emulation_value
+                        
+                        if (emulation_mode == "-d" or emulation_mode == "-p"):                        
                             
-                            if ((int(message["sequence"]) == 0 or (int(message["sequence"]) % int(emulation_value)) != 0)):
+                            if ((int(message["sequence"]) == 0 or (int(message["sequence"]) % int(deterministicValue)) != 0) or probabilisticallyDropped == False):
                                 if message["fin"]== "yes":
-                                    
                                     reserve_printer()
                                     print ("[Summary] %d/%d packets discarded, loss rate = %d%%" %(lostPacketCounter,packetCount,lostPacketCounter*100/packetCount))
                                     release_printer()
-                                    sys.exit()
+                                    process_send()
                                 
                                 #print "ACK received is %d, Next is: %d, base is: %d" %(message["sequence"],nextseqnum,baseseqnum)
                                 if((int(message["sequence"])) == baseseqnum): 
@@ -237,47 +262,49 @@ def launchNode(self_port, peer_port, window_size, emulation_mode, emulation_valu
                                 reserve_printer()
                                 print("[%s] ACK%d discarded" % (repr(time.time()), message["sequence"]))
                                 release_printer()
+                                lostPacketCounter=lostPacketCounter+1
+                                packetCount=packetCount+1
                         else:
                             1;
                             #print "ACK received is %d, Expected is: %d" %(message["sequence"],expectedseqnum)
                 # except:
                 #    print ("[Exception: Cannot deliver an incoming chat transmission]")
         
-
-    global timerOn
-    global bufferLength
-    global lostPacketCounter
-    global packetCount
-    #thread.start_new_thread(receiver_processing, ())
-    threadReceiver = threading.Thread(target=receiver_processing)
-    threadReceiver.start()
-    print("node>"),
-    # Listen to keyboard input and process        
-    keyboardInput = raw_input().strip()
-    
-    packets = parse_keyboard_input(keyboardInput)
-    
-    if packets == False:
-        print("Unknown command.")
-        sys.exit()
-    
-    # Put all packets with sequence numbers in the buffer
-    for i in packets:
-        packetWithHeader = {"sequence": bufferLength, "data": i, "fin": ""}
-        bufferLength = bufferLength + 1
-        buffer.append(packetWithHeader)
-    
-    packetCount = bufferLength
-    buffer[(bufferLength-1)]["fin"]= "yes"
-    firstThread = threading.Thread(target=send_packets_in_window)
-    firstThread.start()
-    
-    while stopSending == False:
-        time.sleep(0.01)
+    def process_send():
+        global timerOn
+        global bufferLength
+        global lostPacketCounter
+        global packetCount
+        #thread.start_new_thread(receiver_processing, ())
+        threadReceiver = threading.Thread(target=receiver_processing)
+        threadReceiver.start()
+        print("node>"),
+        # Listen to keyboard input and process        
+        keyboardInput = raw_input().strip()
         
-    firstThread.join()
+        packets = parse_keyboard_input(keyboardInput)
+        
+        if packets == False:
+            print("Unknown command.")
+            sys.exit()
+        
+        # Put all packets with sequence numbers in the buffer
+        for i in packets:
+            packetWithHeader = {"sequence": bufferLength, "data": i, "fin": ""}
+            bufferLength = bufferLength + 1
+            buffer.append(packetWithHeader)
+        
+        packetCount = bufferLength
+        buffer[(bufferLength-1)]["fin"]= "yes"
+        firstThread = threading.Thread(target=send_packets_in_window)
+        firstThread.start()
+        
+        while stopSending == False:
+            time.sleep(0.01)
+            
+        firstThread.join()
 
-                    
+    process_send()              
     
 ###############################################################
 # Command Line Processing

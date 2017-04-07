@@ -102,7 +102,6 @@ def launchNode(self_port, peer_port, window_size, emulation_mode, emulation_valu
             senderSideSocket.sendto(json.dumps(buffer[newSeqInWindow]), (self_ip, int(peer_port)))
             release_printer()
             #print buffer[newSeqInWindow]
-
           
     def process_timeout(pktNum):
         
@@ -137,7 +136,6 @@ def launchNode(self_port, peer_port, window_size, emulation_mode, emulation_valu
         timerOn = False
         process_timeout(pktNum)
         return True
-        
     
     # Listen for incoming messages and process them            
     def receiver_processing():
@@ -203,8 +201,10 @@ def launchNode(self_port, peer_port, window_size, emulation_mode, emulation_valu
                                 
                                 if message["fin"]== "yes":
                                     message["data"] = None
+                                    message["fin"]="printSummary"
                                     senderSideSocket.sendto(json.dumps(message), (self_ip, int(peer_port)))
                                     reserve_printer()
+                                    print("[%s] ACK%d sent, expecting packet%s" % (repr(time.time()), receivedSequence, expectedseqnum))
                                     print ("[Summary] %d/%d packets dropped, loss rate = %d%%" %(lostPacketCounter,packetCount,lostPacketCounter*100/packetCount))
                                     release_printer()
                                     sys.exit()
@@ -223,22 +223,26 @@ def launchNode(self_port, peer_port, window_size, emulation_mode, emulation_valu
                         
                         # Process ACK, move window as appropriate
                         if emulation_mode == "-p":
-                            if emulation_value > 0:
-                                random_number = random.random()
-                                if random_number < emulation_value:
+                            emulProb=float(emulation_value)
+                            if emulProb > 0:
+                                random_number = float(random.random())
+                                if random_number < emulProb:
                                     probabilisticallyDropped = True
                                 
                         if emulation_mode == "-d":
                             deterministicValue = emulation_value
                         
                         if (emulation_mode == "-d" or emulation_mode == "-p"):                        
-                            
-                            if ((int(message["sequence"]) == 0 or (int(message["sequence"]) % int(deterministicValue)) != 0) or probabilisticallyDropped == False):
-                                if message["fin"]== "yes":
+                            if message["fin"]== "printSummary":
                                     reserve_printer()
+                                    print("[%s] ACK%d received, window moves to %d" % (repr(time.time()), message["sequence"], baseseqnum))
                                     print ("[Summary] %d/%d packets discarded, loss rate = %d%%" %(lostPacketCounter,packetCount,lostPacketCounter*100/packetCount))
                                     release_printer()
                                     process_send()
+                            
+                            
+                            if ((int(message["sequence"]) == 0 or (int(message["sequence"]) % int(deterministicValue)) != 0) or probabilisticallyDropped == False):
+                                
                                 
                                 #print "ACK received is %d, Next is: %d, base is: %d" %(message["sequence"],nextseqnum,baseseqnum)
                                 if((int(message["sequence"])) == baseseqnum): 

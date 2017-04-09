@@ -220,6 +220,7 @@ def launchNode(self_port, peer_port, window_size, emulation_mode, emulation_valu
                                         print ("[Summary] %d/%d packets dropped, loss rate = %d%%" %(lostPacketCounter,packetCount,lostPacketCounter*100/packetCount))
                                         release_printer()
                                         sys.exit()
+                                    #Send ACK
                                     else:
                                         receivedSequence = message["sequence"]
                                         expectedseqnum = message["sequence"] + 1
@@ -240,7 +241,7 @@ def launchNode(self_port, peer_port, window_size, emulation_mode, emulation_valu
                     # SENDER SECTION
                     # Process incoming Ack as Sender
                     else:
-                        
+                        detPacketCounter=detPacketCounter+1
                         # Process ACK, move window as appropriate
                         if emulation_mode == "-p":
                             emulProb=float(emulation_value)
@@ -251,7 +252,9 @@ def launchNode(self_port, peer_port, window_size, emulation_mode, emulation_valu
                                 
                         if emulation_mode == "-d":
                             deterministicValue = emulation_value
-                        
+                            if((int(detPacketCounter) % int(deterministicValue)) == 0):
+                                deterministicallyDropped = True
+                                
                         if (emulation_mode == "-d" or emulation_mode == "-p"):                        
                             if message["fin"]== "printSummary":
                                     buffer[baseseqnum]["Acked"]="yes"
@@ -262,8 +265,15 @@ def launchNode(self_port, peer_port, window_size, emulation_mode, emulation_valu
                                     release_printer()
                                     process_send()
                             
-                            
-                            if ((int(message["sequence"]) == 0 or (int(message["sequence"]) % int(deterministicValue)) != 0) or probabilisticallyDropped == False):
+                            # Emulate packet loss
+                            if (deterministicallyDropped==True or probabilisticallyDropped==True):
+                                reserve_printer()
+                                print("[%s] ACK%d discarded" % (repr(time.time()), message["sequence"]))
+                                release_printer()
+                                lostPacketCounter=lostPacketCounter+1
+                                packetCount=packetCount+1
+                                
+                            elif ((int(message["sequence"]) == 0) or deterministicallyDropped==False or probabilisticallyDropped == False):
                                 
                                 #print "ACK received is %d, Next is: %d, base is: %d" %(message["sequence"],nextseqnum,baseseqnum)
                                 if((int(message["sequence"])) == baseseqnum): 
@@ -276,17 +286,12 @@ def launchNode(self_port, peer_port, window_size, emulation_mode, emulation_valu
                                     if buffer[baseseqnum]["Acked"]=="no":
                                         start_timer(baseseqnum)
                                     time.sleep(0.01)
-                                    
+                                    packetCount=packetCount+1
                                 else:
                                     start_timer(message["sequence"])
 
-                            # Emulate packet loss
-                            else:
-                                reserve_printer()
-                                print("[%s] ACK%d discarded" % (repr(time.time()), message["sequence"]))
-                                release_printer()
-                                lostPacketCounter=lostPacketCounter+1
-                                packetCount=packetCount+1
+                            
+
                         else:
                             1;
                             #print "ACK received is %d, Expected is: %d" %(message["sequence"],expectedseqnum)

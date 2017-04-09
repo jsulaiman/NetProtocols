@@ -67,12 +67,16 @@ def launchNode(self_port, peer_port, window_size, emulation_mode, emulation_valu
         global nextseqnum
         global stopSending
         basebuffer=baseseqnum
+        endWindow=basebuffer+window_size-1
         
-        print ("base:%d, next:%d" %(baseseqnum,nextseqnum))
-        threadTimer = threading.Thread(target=start_timer,args=(buffer[nextseqnum]["sequence"],))
-        threadTimer.start()
+        if basebuffer < bufferLength:
+            #print ("base:%d, next:%d" %(baseseqnum,nextseqnum))
+            threadTimer = threading.Thread(target=start_timer,args=(buffer[basebuffer]["sequence"],))
+            threadTimer.start()
          
-        while basebuffer < (nextseqnum-1):
+        while basebuffer < (endWindow) and basebuffer < bufferLength:
+                if buffer[basebuffer]["Acked"]!="yes":
+                    buffer[basebuffer]["Acked"]="no"
                 reserve_printer()
                 print("[%s] packet%d %s sent" % (repr(time.time()), buffer[basebuffer]["sequence"], buffer[basebuffer]["data"]))
                 senderSideSocket.sendto(json.dumps(buffer[basebuffer]), (self_ip, int(peer_port)))
@@ -86,6 +90,7 @@ def launchNode(self_port, peer_port, window_size, emulation_mode, emulation_valu
         
         #print ("in send_packets. next: %d, base: %d, window: %d, bufferLength: %d" %(nextseqnum,baseseqnum,window_size,bufferLength))
         while (nextseqnum < (baseseqnum + window_size) and nextseqnum < bufferLength):
+                buffer[nextseqnum]["Acked"]="no"
                 reserve_printer()
                 #print "base in send", baseseqnum
                 #print "next in send", nextseqnum
@@ -104,7 +109,7 @@ def launchNode(self_port, peer_port, window_size, emulation_mode, emulation_valu
     def process_timeout(pktNum):
         
         reserve_printer()
-        print "base after timeout", baseseqnum
+        #print "base after timeout", baseseqnum
         print ("[%s] packet%d timeout" % (repr(time.time()), pktNum)) 
         release_printer()
         send_all_packets_in_window()
@@ -249,6 +254,7 @@ def launchNode(self_port, peer_port, window_size, emulation_mode, emulation_valu
                         
                         if (emulation_mode == "-d" or emulation_mode == "-p"):                        
                             if message["fin"]== "printSummary":
+                                    buffer[baseseqnum]["Acked"]="yes"
                                     baseseqnum = baseseqnum + 1
                                     reserve_printer()
                                     print("[%s] ACK%d received, window moves to %d" % (repr(time.time()), message["sequence"], baseseqnum))
@@ -267,14 +273,13 @@ def launchNode(self_port, peer_port, window_size, emulation_mode, emulation_valu
                                     reserve_printer()
                                     print("[%s] ACK%d received, window moves to %d" % (repr(time.time()), message["sequence"], baseseqnum))
                                     release_printer()
+                                    if buffer[baseseqnum]["Acked"]=="no":
+                                        start_timer(baseseqnum)
                                     time.sleep(0.01)
                                     
-                                elif((int(message["sequence"])) > baseseqnum):
-                                    for i in buffer:
-                                        if i["sequence"]==message["sequence"]:
-                                            #buffer.pop()
-                                            #bufferLength=bufferLength-1
-                                            print ("in ACK", buffer)
+                                else:
+                                    start_timer(message["sequence"])
+
                             # Emulate packet loss
                             else:
                                 reserve_printer()
@@ -300,6 +305,18 @@ def launchNode(self_port, peer_port, window_size, emulation_mode, emulation_valu
         # Listen to keyboard input and process        
         keyboardInput = raw_input().strip()
         
+        # Re-initialize the base sequence number, next seq number, and the buffer
+        #=======================================================================
+        #baseseqnum = 0
+        # nextseqnum = 0
+        # expectedseqnum = 0
+        # bufferLength = 0
+        # stopSending = False
+        # lostPacketCounter = 0
+        # packetCount = 0
+        # buffer = []
+        #=======================================================================
+
         packets = parse_keyboard_input(keyboardInput)
         
         if packets == False:
@@ -308,7 +325,7 @@ def launchNode(self_port, peer_port, window_size, emulation_mode, emulation_valu
         
         # Put all packets with sequence numbers in the buffer
         for i in packets:
-            packetWithHeader = {"sequence": bufferLength, "data": i, "fin": "", "Acked": "no"}
+            packetWithHeader = {"sequence": bufferLength, "data": i, "fin": "", "Acked": ""}
             bufferLength = bufferLength + 1
             buffer.append(packetWithHeader)
         

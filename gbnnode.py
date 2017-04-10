@@ -22,6 +22,7 @@ bufferLength = 0
 stopSending = False
 lostPacketCounter = 0
 packetCount = 0
+AckCount = 0
 timerRestart = "no"
 buffer = []
     
@@ -162,6 +163,7 @@ def launchNode(self_port, peer_port, window_size, emulation_mode, emulation_valu
         global bufferLength
         global lostPacketCounter
         global packetCount
+        global AckCount
         
         while True:
             incomingPacket = None
@@ -275,7 +277,7 @@ def launchNode(self_port, peer_port, window_size, emulation_mode, emulation_valu
                                     baseseqnum = baseseqnum + 1
                                     reserve_printer()
                                     print("[%s] ACK%d received, window moves to %d" % (repr(time.time()), message["sequence"], baseseqnum))
-                                    print ("[Summary] %d/%d packets discarded, loss rate = %d%%" %(lostPacketCounter,packetCount,lostPacketCounter*100/packetCount))
+                                    print ("[Summary] %d/%d packets discarded, loss rate = %d%%" %(lostPacketCounter,AckCount,lostPacketCounter*100/AckCount))
                                     release_printer()
                                     process_send()
                             
@@ -286,6 +288,7 @@ def launchNode(self_port, peer_port, window_size, emulation_mode, emulation_valu
                                 release_printer()
                                 lostPacketCounter=lostPacketCounter+1
                                 packetCount=packetCount+1
+                                AckCount=AckCount+1
                                 
                             elif ((int(message["sequence"]) == 0) or deterministicallyDropped==False or probabilisticallyDropped == False):
                                 
@@ -301,6 +304,7 @@ def launchNode(self_port, peer_port, window_size, emulation_mode, emulation_valu
                                         start_timer(baseseqnum)
                                     time.sleep(0.01)
                                     #packetCount=packetCount+1
+                                    AckCount=AckCount+1
                                 elif((int(message["sequence"])) > baseseqnum):
                                     timerOn = False
                                     AckGap = (int(message["sequence"]) - baseseqnum)
@@ -312,6 +316,7 @@ def launchNode(self_port, peer_port, window_size, emulation_mode, emulation_valu
                                         reserve_printer()
                                         print("[%s] ACK%d received, window moves to %d" % (repr(time.time()), (baseseqnum-AckGap), (baseseqnum-AckGap+1)))
                                         release_printer()
+                                        AckCount=AckCount+1
                                     if buffer[baseseqnum]["Acked"]=="no":
                                         start_timer(baseseqnum)
                                     time.sleep(0.01)

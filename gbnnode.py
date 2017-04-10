@@ -164,6 +164,11 @@ def launchNode(self_port, peer_port, window_size, emulation_mode, emulation_valu
         global lostPacketCounter
         global packetCount
         global AckCount
+        global buffer
+        
+        # Global references to allow for buffer reset
+        global stopSending
+        global timerRestart
         
         while True:
             incomingPacket = None
@@ -275,12 +280,32 @@ def launchNode(self_port, peer_port, window_size, emulation_mode, emulation_valu
                             if message["fin"]== "printSummary":
                                     buffer[baseseqnum]["Acked"]="yes"
                                     baseseqnum = baseseqnum + 1
+                                    AckCount=AckCount+1
                                     reserve_printer()
-                                    print("[%s] ACK%d received, window moves to %d" % (repr(time.time()), message["sequence"], baseseqnum))
+                                    print("[%s] ACK%d received, window moves to %d" % (repr(time.time()), message["sequence"], 0))
                                     print ("[Summary] %d/%d packets discarded, loss rate = %d%%" %(lostPacketCounter,AckCount,lostPacketCounter*100/AckCount))
                                     release_printer()
+                                    
+                                    time.sleep(2)
+                                    # Re-initialize the base sequence number, next seq number, and the buffer
+                                    global bufferLength
+                                    global stopSending
+                                    global timerRestart
+                                    
+                                    baseseqnum = 0
+                                    nextseqnum = 0
+                                    expectedseqnum = 0
+                                    bufferLength = 0
+                                    stopSending = False
+                                    lostPacketCounter = 0
+                                    packetCount = 0
+                                    AckCount = 0
+                                    timerRestart = "no"
+                                    buffer = []
+                                    timerOn = False
                                     process_send()
-                            
+                                    
+                                    time.sleep(2)
                             # Emulate packet loss
                             if (deterministicallyDropped==True or probabilisticallyDropped==True):
                                 reserve_printer()
@@ -342,18 +367,6 @@ def launchNode(self_port, peer_port, window_size, emulation_mode, emulation_valu
         print("node>"),
         # Listen to keyboard input and process        
         keyboardInput = raw_input().strip()
-        
-        # Re-initialize the base sequence number, next seq number, and the buffer
-        #=======================================================================
-        #baseseqnum = 0
-        # nextseqnum = 0
-        # expectedseqnum = 0
-        # bufferLength = 0
-        # stopSending = False
-        # lostPacketCounter = 0
-        # packetCount = 0
-        # buffer = []
-        #=======================================================================
 
         packets = parse_keyboard_input(keyboardInput)
         

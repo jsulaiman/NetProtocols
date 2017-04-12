@@ -38,152 +38,450 @@ Receiver: 2222 1111 5 -p 0.1
 
 Sender log:
 node> send abcdefghijklmnopqrstuvwxyz
-[1491965056.509] packet2 timeout
-[1491965056.509] packet0 a sent
-[1491965056.509] ACK0 received, window moves to 1
-[1491965056.521] packet1 b sent
-[1491965056.521] ACK1 received, window moves to 2
-[1491965056.532] packet2 c sent
-[1491965056.532] ACK2 received, window moves to 3
-[1491965056.543] packet3 d sent
-[1491965056.543] ACK3 received, window moves to 4
-[1491965056.554] packet4 e sent
-[1491965056.554] ACK4 received, window moves to 5
-[1491965056.565] packet5 f sent
-[1491965056.566] ACK5 discarded
-[1491965056.577] packet6 g sent
-[1491965056.579] ACK6 received, window moves to 7
-[1491965056.588] packet7 h sent
-[1491965056.589] ACK7 received, window moves to 8
-[1491965056.599] packet8 i sent
-[1491965056.6] ACK8 received, window moves to 9
-[1491965056.61] packet9 j sent
-[1491965056.612] ACK9 discarded
-[1491965056.621] packet10 k sent
-[1491965056.622] ACK8 received, window moves to 9
-[1491965056.622] ACK10 received, window moves to 11
-[1491965056.632] packet11 l sent
-[1491965056.643] packet12 m sent
-[1491965056.644] ACK11 discarded
-[1491965056.644] ACK12 discarded
-[1491965056.655] packet13 n sent
-[1491965056.655] ACK9 received, window moves to 10
-[1491965056.655] ACK11 received, window moves to 12
-[1491965056.655] ACK13 received, window moves to 14
-[1491965056.666] packet14 o sent
-[1491965056.676] ACK14 received, window moves to 15
-[1491965056.677] packet15 p sent
-[1491965056.688] packet16 q sent
-[1491965056.699] packet17 r sent
-[1491965056.71] packet18 s sent
-[1491965057.17] packet10 timeout
-[1491965057.18] ACK15 received, window moves to 16
-[1491965057.194] ACK16 received, window moves to 17
-[1491965057.216] ACK17 received, window moves to 18
-[1491965057.235] ACK18 received, window moves to 19
-[1491965057.767] packet17 timeout
-[1491965057.783] packet18 timeout
-[1491965057.784] packet18 s sent
-[1491965057.785] packet19 t sent
-[1491965057.786] packet20 u sent
-[1491965057.786] packet21 v sent
-[1491965057.787] ACK19 received, window moves to 20[1491965057.787] packet22 w sent
+[1491975351.513] packet0 a sent
+[1491975351.513] packet25 timeout
+[1491975351.513] ACK0 received, window moves to 1
+[1491975351.524] packet1 b sent
+[1491975351.524] ACK1 discarded
+[1491975351.535] packet2 c sent
+[1491975351.535] ACK2 received, window moves to 3
+[1491975351.546] packet3 d sent
+[1491975351.546] ACK3 discarded
+[1491975351.557] packet4 e sent
+[1491975351.557] ACK2 received, window moves to 3
+[1491975351.557] ACK4 received, window moves to 5
+[1491975351.568] packet5 f sent
+[1491975351.568] packet4 timeout
+[1491975351.568] packet4 e sent
+[1491975351.568] packet5 f sent
+[1491975351.568] packet6 g sent
+[1491975351.569] packet7 h sent
+[1491975351.569] packet8 i sent
+[1491975351.569] ACK5 received, window moves to 6
+[1491975351.578] packet6 g sent
+[1491975351.578] ACK6 received, window moves to 7
+[1491975351.58] packet5 timeout
+[1491975351.587] packet1 timeout
+[1491975351.589] packet7 h sent
+[1491975351.589] packet6 timeout
+[1491975351.589] ACK7 received, window moves to 8
+[1491975351.589] packet6 g sent
+[1491975351.59] packet7 h sent
+[1491975351.59] packet8 i sent
+[1491975351.59] packet9 j sent
+[1491975351.59] packet10 k sent
+[1491975351.591] ACK8 discarded
+[1491975351.591] ACK7 received, window moves to 8
+[1491975351.591] ACK9 received, window moves to 10
+[1491975351.599] packet8 i sent
+[1491975351.6] packet6 timeout
+[1491975351.6] ACK10 received, window moves to 11
+[1491975351.61] packet9 j sent
+[1491975351.621] packet10 k sent
+[1491975351.633] packet11 l sent
+[1491975351.633] ACK11 received, window moves to 12
+[1491975351.644] packet10 timeout
+[1491975351.645] packet12 m sent
+[1491975351.645] packet11 timeout
+[1491975351.645] packet11 l sent
+[1491975351.646] packet12 m sent
+[1491975351.646] packet13 n sent
+[1491975351.646] packet14 o sent
+[1491975351.646] packet15 p sent
+[1491975351.654] ACK12 received, window moves to 13
+[1491975351.656] packet13 n sent
+[1491975351.657] ACK13 discarded
+[1491975351.657] ACK12 received, window moves to 13
+[1491975351.657] ACK14 received, window moves to 15
+[1491975351.666] packet11 timeout
+[1491975351.667] packet14 o sent
+[1491975351.675] ACK15 received, window moves to 16
+[1491975351.678] packet15 p sent
+[1491975351.689] packet16 q sent
+[1491975351.7] packet17 r sent
+[1491975351.711] packet18 s sent
+[1491975351.722] packet19 t sent
+[1491975352.188] packet14 timeout
+[1491975352.194] packet15 timeout
+[1491975352.195] packet15 p sent
+[1491975352.195] packet16 q sent
+[1491975352.196] packet17 r sent
+[1491975352.197] packet18 s sent
+[1491975352.198] packet19 t sent
+[1491975352.2] packet15 timeout
+[1491975352.2] packet14 timeout
+[1491975352.201] packet15 p sent
+[1491975352.202] packet16 q sent
+[1491975352.202] packet17 r sent
+[1491975352.203] packet18 s sent
+[1491975352.203] packet19 t sent
+[1491975352.723] packet15 timeout
+[1491975352.724] packet15 p sent
+[1491975352.725] packet16 q sent
+[1491975352.725] packet17 r sent
+[1491975352.726] packet18 s sent
+[1491975352.727] packet19 t sent
+[1491975352.728] packet15 timeout
+[1491975352.728] ACK18 received, window moves to 19
+[1491975352.729] ACK18 received, window moves to 19
+[1491975352.729] ACK18 received, window moves to 19
+[1491975352.739] packet18 timeout
+[1491975352.739] packet18 timeout
+[1491975352.74] packet18 timeout
+[1491975352.741] packet18 s sent
+[1491975352.742] packet18 s sent
+[1491975352.743] packet19 t sent
+[1491975352.744] packet20 u sent
+[1491975352.745] packet19 t sent
+[1491975352.746] packet18 s sent[1491975352.746] packet20 u sent
 
-[1491965058.335] packet18 timeout
-[1491965058.338] packet19 timeout
-[1491965058.338] packet19 t sent
-[1491965058.339] packet20 u sent
-[1491965058.34] packet21 v sent
-[1491965058.34] packet22 w sent
-[1491965058.341] packet23 x sent
-[1491965058.342] ACK21 received, window moves to 22
-[1491965058.342] ACK21 received, window moves to 22
-[1491965058.353] ACK22 discarded
-[1491965058.892] packet21 timeout
-[1491965058.892] packet21 timeout
-[1491965058.893] packet21 v sent
-[1491965058.894] packet22 w sent
-[1491965058.895] packet23 x sent
-[1491965058.896] packet24 y sent
-[1491965058.897] ACK21 received, window moves to 22
-[1491965058.897] ACK23 received, window moves to 24
-[1491965058.898] packet25 z sent
-[1491965058.898] packet21 v sent
-[1491965058.899] packet22 w sent
-[1491965058.899] packet23 x sent
-[1491965058.9] packet24 y sent
-[1491965058.901] packet25 z sent
-[1491965058.909] ACK24 received, window moves to 25
-[1491965059.445] packet23 timeout
-[1491965061.413] ACK25 received, window moves to 0
-[Summary] 5/30 packets discarded, loss rate = 16%
+[1491975352.747] packet21 v sent
+[1491975352.748] packet19 t sent
+[1491975352.748] packet22 w sent
+[1491975352.749] packet20 u sent
+[1491975352.749] packet21 v sent
+[1491975352.749] packet21 v sent
+[1491975352.75] packet22 w sent
+[1491975352.75] packet22 w sent
+[1491975352.76] ACK19 received, window moves to 20
+[1491975352.762] ACK20 received, window moves to 21
+[1491975352.763] ACK21 received, window moves to 22
+[1491975352.772] packet20 timeout
+[1491975352.773] packet21 timeout
+[1491975352.773] packet21 v sent
+[1491975352.774] packet22 w sent
+[1491975352.775] packet23 x sent
+[1491975352.775] packet24 y sent
+[1491975352.776] packet25 z sent
+[1491975352.781] ACK22 received, window moves to 23
+[1491975352.783] ACK23 received, window moves to 24
+[1491975352.787] ACK24 received, window moves to 25
+[1491975352.793] packet23 timeout
+[1491975352.799] packet24 timeout
+[1491975352.8] packet24 y sent
+[1491975352.8] packet25 z sent
+[1491975353.802] ACK25 received, window moves to 0
+[Summary] 4/29 packets discarded, loss rate = 13%
 node> 
 
 Receiver log:
-[1491965056.509] packet0 a received
-[1491965056.509] ACK0 sent, expecting packet1
-[1491965056.521] packet1 b received
-[1491965056.521] ACK1 sent, expecting packet2
-[1491965056.532] packet2 c received
-[1491965056.532] ACK2 sent, expecting packet3
-[1491965056.543] packet3 d received
-[1491965056.543] ACK3 sent, expecting packet4
-[1491965056.554] packet4 e received
-[1491965056.554] ACK4 sent, expecting packet5
-[1491965056.566] packet5 f received
-[1491965056.566] ACK5 sent, expecting packet6
-[1491965056.578] packet6 g received
-[1491965056.579] ACK6 sent, expecting packet7
-[1491965056.589] packet7 h received
-[1491965056.589] ACK7 sent, expecting packet8
-[1491965056.6] packet8 i received
-[1491965056.6] ACK8 sent, expecting packet9
-[1491965056.61] packet9 j received
-[1491965056.611] ACK9 sent, expecting packet10
-[1491965056.621] packet10 k received
-[1491965056.622] ACK10 sent, expecting packet11
-[1491965056.632] packet11 l received
-[1491965056.633] ACK11 sent, expecting packet12
-[1491965056.644] packet12 m received
-[1491965056.644] ACK12 sent, expecting packet13
-[1491965056.655] packet13 n received
-[1491965056.655] ACK13 sent, expecting packet14
-[1491965056.666] packet14 o received
-[1491965056.666] ACK14 sent, expecting packet15
-[1491965056.677] packet15 p received
-[1491965056.678] ACK15 sent, expecting packet16
-[1491965056.688] packet16 q received
-[1491965056.688] ACK16 sent, expecting packet17
-[1491965056.699] packet17 r received
-[1491965056.699] ACK17 sent, expecting packet18
-[1491965056.71] packet18 s received
-[1491965056.71] ACK18 sent, expecting packet19
-[1491965057.785] packet18 s received
-[1491965057.786] packet19 t received
-[1491965057.787] packet20 u discarded
-[1491965057.787] ACK19 sent, expecting packet20
-[1491965057.787] packet21 v received
-[1491965057.788] packet22 w received
-[1491965058.339] packet19 t discarded
-[1491965058.34] packet20 u received
-[1491965058.34] packet21 v received
-[1491965058.341] ACK20 sent, expecting packet22
-[1491965058.341] packet22 w received
-[1491965058.341] ACK21 sent, expecting packet23
-[1491965058.342] ACK22 sent, expecting packet23
-[1491965058.342] packet23 x discarded
-[1491965058.894] packet21 v received
-[1491965058.895] packet22 w received
-[1491965058.896] packet23 x received
-[1491965058.897] ACK23 sent, expecting packet24
-[1491965058.897] packet24 y received
-[1491965058.898] ACK24 sent, expecting packet25
-[1491965058.898] packet25 z received
-[1491965058.899] packet21 v discarded
-[1491965058.899] packet22 w received
-[1491965058.9] packet23 x received
-[1491965058.901] packet24 y received
-[1491965058.901] packet25 z received
-[1491965061.401] ACK25 sent, expecting packet26
-[Summary] 4/39 packets dropped, loss rate = 10%
+[1491975304.313] packet0 a received
+[1491975304.314] ACK0 sent, expecting packet1
+[1491975304.324] packet1 b received
+[1491975304.324] ACK1 sent, expecting packet2
+[1491975304.335] packet2 c received
+[1491975304.335] ACK2 sent, expecting packet3
+[1491975304.346] packet3 d received
+[1491975304.346] ACK3 sent, expecting packet4
+[1491975304.358] packet4 e received
+[1491975304.358] ACK4 sent, expecting packet5
+[1491975304.37] packet5 f received
+[1491975304.371] ACK5 sent, expecting packet6
+[1491975304.382] packet6 g received
+[1491975304.383] ACK6 sent, expecting packet7
+[1491975304.394] packet7 h received
+[1491975304.394] ACK7 sent, expecting packet8
+[1491975304.405] packet8 i received
+[1491975304.405] ACK8 sent, expecting packet9
+[1491975304.417] packet9 j received
+[1491975304.417] ACK9 sent, expecting packet10
+[1491975304.428] packet10 k received
+[1491975304.429] ACK10 sent, expecting packet11
+[1491975304.439] packet11 l received
+[1491975304.44] ACK11 sent, expecting packet12
+[1491975305.454] packet12 m received
+[1491975305.454] ACK12 sent, expecting packet13
+[1491975305.99] packet13 n received
+[1491975305.991] ACK13 sent, expecting packet14
+[1491975306.538] packet14 o received
+[1491975306.539] ACK14 sent, expecting packet15
+[1491975307.075] packet15 p discarded
+[1491975307.604] packet15 p discarded
+[1491975307.628] packet15 p discarded
+[1491975308.159] packet15 p received
+[1491975308.16] ACK15 sent, expecting packet16
+[1491975308.16] packet16 q received
+[1491975308.16] ACK16 sent, expecting packet17
+[1491975308.161] packet17 r received
+[1491975308.161] ACK17 sent, expecting packet18
+[1491975308.161] packet18 s received
+[1491975308.162] ACK18 sent, expecting packet19
+[1491975308.693] packet19 t received
+[1491975308.694] ACK19 sent, expecting packet20
+[1491975309.226] packet20 u received
+[1491975309.226] ACK20 sent, expecting packet21
+[1491975309.756] packet21 v received
+[1491975309.757] ACK21 sent, expecting packet22
+[1491975310.291] packet22 w received
+[1491975310.292] ACK22 sent, expecting packet23
+[1491975310.821] packet23 x received
+[1491975310.822] ACK23 sent, expecting packet24
+[1491975310.845] packet24 y discarded
+[1491975311.379] packet24 y received
+[1491975311.38] ACK24 sent, expecting packet25
+[1491975312.381] Last ACK25 sent
+[Summary] 4/29 packets dropped, loss rate = 13%
+node> [1491975327.897] packet0 a received
+[1491975327.897] ACK0 sent, expecting packet1
+[1491975327.909] packet1 b received
+[1491975327.909] ACK1 sent, expecting packet2
+[1491975327.92] packet2 c received
+[1491975327.92] ACK2 sent, expecting packet3
+[1491975327.931] packet3 d received
+[1491975327.932] ACK3 sent, expecting packet4
+[1491975327.943] packet4 e received
+[1491975327.943] ACK4 sent, expecting packet5
+[1491975327.945] packet5 f discarded
+[1491975327.954] packet5 f received
+[1491975327.955] ACK5 sent, expecting packet6
+[1491975327.966] packet6 g received
+[1491975327.966] ACK6 sent, expecting packet7
+[1491975327.97] packet7 h received
+[1491975327.971] ACK7 sent, expecting packet8
+[1491975327.971] packet8 i received
+[1491975327.972] ACK8 sent, expecting packet9
+[1491975327.972] packet9 j received
+[1491975327.972] ACK9 sent, expecting packet10
+[1491975327.997] packet10 k discarded
+[1491975328.011] packet10 k received
+[1491975328.011] ACK10 sent, expecting packet11
+[1491975328.021] packet11 l received
+[1491975328.021] ACK11 sent, expecting packet12
+[1491975328.022] packet12 m received
+[1491975328.022] ACK12 sent, expecting packet13
+[1491975328.045] packet13 n received
+[1491975328.046] ACK13 sent, expecting packet14
+[1491975328.049] packet14 o received
+[1491975328.049] ACK14 sent, expecting packet15
+[1491975328.067] packet15 p received
+[1491975328.067] ACK15 sent, expecting packet16
+[1491975328.095] packet16 q received
+[1491975328.096] ACK16 sent, expecting packet17
+[1491975328.096] packet17 r received
+[1491975328.097] ACK17 sent, expecting packet18
+[1491975328.097] packet18 s received
+[1491975328.097] ACK18 sent, expecting packet19
+[1491975328.121] packet19 t discarded
+[1491975328.652] packet19 t received
+[1491975328.653] ACK19 sent, expecting packet20
+[1491975328.653] packet20 u received
+[1491975328.653] ACK20 sent, expecting packet21
+[1491975328.654] packet21 v received
+[1491975328.654] ACK21 sent, expecting packet22
+[1491975328.667] packet22 w received
+[1491975328.668] ACK22 sent, expecting packet23
+[1491975328.668] packet23 x received
+[1491975328.669] ACK23 sent, expecting packet24
+[1491975328.669] packet24 y received
+[1491975328.67] ACK24 sent, expecting packet25
+[1491975329.694] Last ACK25 sent
+[Summary] 3/28 packets dropped, loss rate = 10%
+node> send abcdefghijklmnopqrstuvwxyz
+[1491975336.106] packet0 a sent
+
+[1491975336.106] ACK0 received, window moves to 1
+[1491975336.116] packet1 b sent
+[1491975336.117] ACK1 received, window moves to 2
+[1491975336.128] packet2 c sent
+[1491975336.128] ACK2 received, window moves to 3
+[1491975336.138] packet3 d sent
+[1491975336.139] ACK3 received, window moves to 4
+[1491975336.149] packet4 e sent
+[1491975336.15] ACK4 discarded
+[1491975336.16] packet5 f sent
+[1491975336.161] ACK5 received, window moves to 6
+[1491975336.171] packet6 g sent
+[1491975336.183] packet7 h sent
+[1491975336.194] packet8 i sent
+[1491975336.206] packet9 j sent
+[1491975336.675] packet4 timeout
+[1491975336.677] packet5 timeout
+[1491975336.677] packet5 f sent
+[1491975336.678] packet6 g sent
+[1491975336.679] packet7 h sent
+[1491975336.679] packet8 i sent
+[1491975336.68] packet9 j sent
+[1491975336.691] ACK6 received, window moves to 7
+[1491975337.204] packet5 timeout
+[1491975337.207] packet6 timeout
+[1491975337.208] packet6 g sent
+[1491975337.208] packet7 h sent
+[1491975337.209] packet8 i sent
+[1491975337.209] packet9 j sent
+[1491975337.21] packet10 k sent
+[1491975337.221] ACK7 received, window moves to 8
+[1491975337.737] packet6 timeout
+[1491975337.742] packet7 timeout
+[1491975337.743] packet7 h sent
+[1491975337.744] packet8 i sent
+[1491975337.744] packet9 j sent
+[1491975337.745] packet10 k sent
+[1491975337.745] packet11 l sent
+[1491975337.756] ACK8 received, window moves to 9
+[1491975338.27] packet7 timeout
+[1491975338.275] packet8 timeout
+[1491975338.275] packet8 i sent
+[1491975338.276] packet9 j sent
+[1491975338.277] packet10 k sent
+[1491975338.277] packet11 l sent
+[1491975338.278] packet12 m sent
+[1491975338.289] ACK9 discarded
+[1491975338.289] ACK8 received, window moves to 9
+[1491975338.289] ACK10 received, window moves to 11
+[1491975338.3] packet10 timeout
+[1491975338.301] packet10 k sent
+[1491975338.301] packet11 l sent
+[1491975338.302] packet12 m sent
+[1491975338.302] packet13 n sent
+[1491975338.303] packet14 o sent
+[1491975338.314] ACK11 received, window moves to 12
+[1491975338.83] packet10 timeout
+[1491975338.832] packet11 timeout
+[1491975338.832] packet11 l sent
+[1491975338.833] packet12 m sent
+[1491975338.834] packet13 n sent
+[1491975338.834] packet14 o sent
+[1491975338.835] packet15 p sent
+[1491975338.846] ACK12 discarded
+[1491975338.846] ACK11 received, window moves to 12
+[1491975338.846] ACK13 received, window moves to 14
+[1491975338.856] packet13 timeout
+[1491975338.857] packet13 n sent
+[1491975338.858] packet14 o sent
+[1491975338.858] packet15 p sent
+[1491975338.859] packet16 q sent
+[1491975338.859] packet17 r sent
+[1491975338.87] ACK14 discarded
+[1491975338.87] ACK13 received, window moves to 14
+[1491975338.87] ACK15 received, window moves to 16
+[1491975338.882] packet15 timeout
+[1491975338.882] packet15 p sent
+[1491975338.883] packet16 q sent
+[1491975338.884] packet17 r sent
+[1491975338.884] packet18 s sent
+[1491975338.885] packet19 t sent
+[1491975338.895] ACK16 received, window moves to 17
+[1491975339.41] packet15 timeout
+[1491975339.413] packet16 timeout
+[1491975339.414] packet16 q sent
+[1491975339.414] packet17 r sent
+[1491975339.415] packet18 s sent
+[1491975339.415] packet19 t sent
+[1491975339.416] packet20 u sent
+[1491975339.427] ACK17 received, window moves to 18
+[1491975339.942] packet16 timeout
+[1491975339.943] packet17 timeout
+[1491975339.943] packet17 r sent
+[1491975339.944] packet18 s sent
+[1491975339.945] packet19 t sent
+[1491975339.945] packet20 u sent
+[1491975339.946] packet21 v sent
+[1491975339.957] ACK18 received, window moves to 19
+[1491975340.473] packet17 timeout
+[1491975340.474] packet18 timeout
+[1491975340.474] packet18 s sent
+[1491975340.475] packet19 t sent
+[1491975340.476] packet20 u sent
+[1491975340.476] packet21 v sent
+[1491975340.477] packet22 w sent
+[1491975340.488] ACK19 received, window moves to 20
+[1491975341.006] packet18 timeout
+[1491975341.007] packet19 timeout
+[1491975341.007] packet19 t sent
+[1491975341.008] packet20 u sent
+[1491975341.009] packet21 v sent
+[1491975341.009] packet22 w sent
+[1491975341.01] packet23 x sent
+[1491975341.021] ACK20 received, window moves to 21
+[1491975341.535] packet19 timeout
+[1491975341.536] packet20 timeout
+[1491975341.536] packet20 u sent
+[1491975341.537] packet21 v sent
+[1491975341.538] packet22 w sent
+[1491975341.538] packet23 x sent
+[1491975341.539] packet24 y sent
+[1491975341.55] ACK21 received, window moves to 22
+[1491975342.067] packet20 timeout
+[1491975342.069] packet21 timeout
+[1491975342.069] packet21 v sent
+[1491975342.07] packet22 w sent
+[1491975342.071] packet23 x sent
+[1491975342.071] packet24 y sent
+[1491975342.072] packet25 z sent
+[1491975342.083] ACK22 received, window moves to 23
+[1491975342.595] packet21 timeout
+[1491975342.598] packet22 timeout
+[1491975342.599] packet22 w sent
+[1491975342.6] packet23 x sent
+[1491975342.601] packet24 y sent
+[1491975342.601] packet25 z sent
+[1491975342.613] ACK23 received, window moves to 24
+[1491975343.127] packet22 timeout
+[1491975343.131] packet23 timeout
+[1491975343.131] packet23 x sent
+[1491975343.132] packet24 y sent
+[1491975343.133] packet25 z sent
+[1491975343.143] ACK24 received, window moves to 25
+[1491975343.656] packet23 timeout
+[1491975343.661] packet24 timeout
+[1491975343.661] packet24 y sent
+[1491975343.662] packet25 z sent
+[1491975344.674] ACK25 received, window moves to 0
+[Summary] 4/29 packets discarded, loss rate = 13%
+node> [1491975351.513] packet0 a received
+[1491975351.513] ACK0 sent, expecting packet1
+[1491975351.524] packet1 b received
+[1491975351.524] ACK1 sent, expecting packet2
+[1491975351.535] packet2 c received
+[1491975351.535] ACK2 sent, expecting packet3
+[1491975351.546] packet3 d received
+[1491975351.546] ACK3 sent, expecting packet4
+[1491975351.557] packet4 e received
+[1491975351.557] ACK4 sent, expecting packet5
+[1491975351.568] packet5 f received
+[1491975351.568] ACK5 sent, expecting packet6
+[1491975351.569] packet6 g discarded
+[1491975351.578] packet6 g received
+[1491975351.578] ACK6 sent, expecting packet7
+[1491975351.589] packet7 h received
+[1491975351.589] ACK7 sent, expecting packet8
+[1491975351.59] packet8 i received
+[1491975351.59] ACK8 sent, expecting packet9
+[1491975351.59] packet9 j received
+[1491975351.59] ACK9 sent, expecting packet10
+[1491975351.59] packet10 k received
+[1491975351.59] ACK10 sent, expecting packet11
+[1491975351.633] packet11 l received
+[1491975351.633] ACK11 sent, expecting packet12
+[1491975351.645] packet12 m received
+[1491975351.645] ACK12 sent, expecting packet13
+[1491975351.646] packet13 n received
+[1491975351.646] ACK13 sent, expecting packet14
+[1491975351.646] packet14 o received
+[1491975351.647] ACK14 sent, expecting packet15
+[1491975351.647] packet15 p received
+[1491975351.647] ACK15 sent, expecting packet16
+[1491975351.689] packet16 q discarded
+[1491975352.196] packet16 q discarded
+[1491975352.202] packet16 q discarded
+[1491975352.726] packet16 q received
+[1491975352.726] ACK16 sent, expecting packet17
+[1491975352.726] packet17 r received
+[1491975352.727] ACK17 sent, expecting packet18
+[1491975352.727] packet18 s received
+[1491975352.728] ACK18 sent, expecting packet19
+[1491975352.728] packet19 t received
+[1491975352.728] ACK19 sent, expecting packet20
+[1491975352.745] packet20 u received
+[1491975352.746] ACK20 sent, expecting packet21
+[1491975352.748] packet21 v received
+[1491975352.749] ACK21 sent, expecting packet22
+[1491975352.749] packet22 w received
+[1491975352.75] ACK22 sent, expecting packet23
+[1491975352.776] packet23 x received
+[1491975352.776] ACK23 sent, expecting packet24
+[1491975352.777] packet24 y received
+[1491975352.777] ACK24 sent, expecting packet25
+[1491975353.779] Last ACK25 sent
+[Summary] 4/29 packets dropped, loss rate = 13%
 node> 

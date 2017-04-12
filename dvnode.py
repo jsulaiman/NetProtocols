@@ -33,7 +33,7 @@ if len(neighborNodes) > 16:
     sys.exit()
     
 for i in neighborNodes:
-    if int(i) < 1024:
+    if int(i) < 1024 and int(i) > 65534:
         print("Please enter a port number that is greater than 1024")
         sys.exit()
     else:

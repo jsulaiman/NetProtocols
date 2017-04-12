@@ -24,6 +24,10 @@ ACKs are sent back to the sender from the receiver, with the data section contai
 At the start of the program the entries inputted by the user using the <send> command is placed in a buffer.
 
 The program utilizes multithreading; one thread to listen for incoming packets, and another to perform timeout and sending/resending mechanism.
+
+B. dvnode.py: A graph based program, where graph: G = (N,E). Where N is a set of routers = {u,v,w,x,y,z} and E is a set of links = {(u,v),(u,x),(v,x),(v,w),(x,w),(x,y),(w,y),(w,z),(y,z)}
+
+
 USAGE SCENARIOS
 
 ALGORITHM AND DATA STRUCTURES EXPLANATION

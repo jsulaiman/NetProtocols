@@ -7,13 +7,16 @@ import threading
 import os
 import json
 import random
+from platform import node
 
 
-# A list of global variables to be used throughout the GBN program
+# A list of global variables to be used throughout the DV program
 argList = []  # Argument parser
 readyToPrint = True
+
+neighborsNodes = {} 
 routingTableEntry = {"NeighborNode": 0, "Distance": 0, "NextHop": 0}
-nodeRoutingTable = []
+nodeRoutingTable = {}
 # Read all arguments into a list, with error handling
 for eachArg in sys.argv:   
         argList.append(eachArg)
@@ -31,23 +34,21 @@ neighborNodes = argList[0::2]
 if len(neighborNodes) > 16:
     print ("Too many nodes (maximum 16")
     sys.exit()
-    
+
+count = 0
 for i in neighborNodes:
-    if int(i) < 1024 and int(i) > 65534:
-        print("Please enter a port number that is greater than 1024")
-        sys.exit()
-    else:
-        routingTableEntry["NeighborNode"]=int(i)
-        nodeRoutingTable.append(routingTableEntry)
-   
-for i in neighborDistance:
-        routingTableEntry["Distance"]=float(i)
-        nodeRoutingTable.append(routingTableEntry)
+        # test for use of 'localhost' or other hostname mappings
+        neighborId = count 
+        nodeRoutingTable[count] = {}
+        nodeRoutingTable[neighborId]["Node"] = i
+
         
-             
+        count+=1
 print nodeRoutingTable
 
-
-
-
+count = 0
+for i in nodeRoutingTable:
+    nodeRoutingTable[count]["Distance"]=neighborDistance[count]
+    count+=1
     
+print nodeRoutingTable

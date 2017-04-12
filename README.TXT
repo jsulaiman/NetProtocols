@@ -25,8 +25,8 @@ At the start of the program the entries inputted by the user using the <send> co
 
 The program utilizes multithreading; one thread to listen for incoming packets, and another to perform timeout and sending/resending mechanism.
 
-B. dvnode.py: A graph based program, where graph: G = (N,E). Where N is a set of routers = {u,v,w,x,y,z} and E is a set of links = {(u,v),(u,x),(v,x),(v,w),(x,w),(x,y),(w,y),(w,z),(y,z)}
-
+B. dvnode.py: A graph based program utilizing Bellman-Ford distance vector algorithm, where graph: G = (N,E). Where N is a set of routers = {u,v,w,x,y,z} and E is a set of links = {(u,v),(u,x),(v,x),(v,w),(x,w),(x,y),(w,y),(w,z),(y,z)}
+   c(w,z) is the cost of the link.
 
 USAGE SCENARIOS
 

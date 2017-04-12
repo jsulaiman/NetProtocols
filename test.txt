@@ -1,11 +1,38 @@
+===========
+Probabilistic Test, 1152 characters.
+Sender: 1111 2222 5 -p 0.1
+Receiver: 2222 1111 5 -p 0.1
 send youalsohaveanotablelevelofinterestinyoualsohaveanotablelevelofinterestinyoualsohaveanotablelevelofinterestinyoualsohaveanotablelevelofinterestinyoualsohaveanotablelevelofinterestinyoualsohaveanotablelevelofinterestinyoualsohaveanotablelevelofinterestinyoualsohaveanotablelevelofinterestinyoualsohaveanotablelevelofinterestinyoualsohaveanotablelevelofinterestinyoualsohaveanotablelevelofinterestinyoualsohaveanotablelevelofinterestinyoualsohaveanotablelevelofinterestinyoualsohaveanotablelevelofinterestinyoualsohaveanotablelevelofinterestinyoualsohaveanotablelevelofinterestinyoualsohaveanotablelevelofinterestinyoualsohaveanotablelevelofinterestinyoualsohaveanotablelevelofinterestinyoualsohaveanotablelevelofinterestinyoualsohaveanotablelevelofinterestinyoualsohaveanotablelevelofinterestinyoualsohaveanotablelevelofinterestinyoualsohaveanotablelevelofinterestinyoualsohaveanotablelevelofinterestinyoualsohaveanotablelevelofinterestinyoualsohaveanotablelevelofinterestinyoualsohaveanotablelevelofinterestinyoualsohaveanotablelevelofinterestinyoualsohaveanotablelevelofinterestinyoualsohaveanotablelevelofinterestinyoualsohaveanotablelevelofinterestin
 
+Receiver log:
+[1491965710.853] packet1150 i received
+[1491965710.853] ACK1150 sent, expecting packet1151
+[1491965711.406] packet1148 s received
+[1491965711.407] packet1149 t received
+[1491965711.408] packet1150 i received
+[1491965711.408] packet1151 n received
+[1491965713.91] ACK1151 sent, expecting packet1152
+[Summary] 502/5106 packets dropped, loss rate = 9%
 
-1152
+Sender log:
+[1491965711.419] ACK1149 received, window moves to 1150
+[1491965711.955] packet1148 timeout
+[1491965711.967] packet1149 timeout
+[1491965711.968] packet1149 t sent
+[1491965711.968] packet1150 i sent
+[1491965711.969] packet1151 n sent
+[1491965711.98] ACK1150 received, window moves to 1151
+[1491965712.513] packet1149 timeout
+[1491965712.528] packet1150 timeout
+[1491965712.529] packet1150 i sent
+[1491965712.529] packet1151 n sent
+[1491965715.042] ACK1151 received, window moves to 0
+[Summary] 126/1277 packets discarded, loss rate = 9%
+node> 
 
 
 ===========
-Probabilistic Test.
+Probabilistic Test, alphabet
 Sender: 1111 2222 5 -p 0.1
 Receiver: 2222 1111 5 -p 0.1
 

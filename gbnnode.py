@@ -95,6 +95,7 @@ def launchNode(self_port, peer_port, window_size, emulation_mode, emulation_valu
         
         #print ("in send_packets. next: %d, base: %d, window: %d, bufferLength: %d" %(nextseqnum,baseseqnum,window_size,bufferLength))
         while (nextseqnum < (baseseqnum + window_size) and nextseqnum < bufferLength):
+                
                 buffer[nextseqnum]["Acked"]="no"
                 reserve_printer()
                 #print "base in send", baseseqnum
@@ -131,11 +132,11 @@ def launchNode(self_port, peer_port, window_size, emulation_mode, emulation_valu
         t_start = time.time()
         t_end = time.time() + 0.5
         #reserve_printer()
-        #print "in timer %d [%s]" % (pktNum, t_end)
+        #print "in timer while buffer", buffer[pktNum]
         #release_printer()
-        while (t_start < t_end and buffer[pktNum]["Acked"]=="no"):
+        while (t_start < t_end and buffer[pktNum]["Acked"]=="no" and timerOn == True):
                 #reserve_printer()
-                #print "buffer", buffer[pktNum]
+                
                 #print "packet%d is in timer: [%s], stop at [%s]" % (pktNum, t_start,t_end)
                 #release_printer()
                 t_start = t_start + .01
@@ -214,19 +215,14 @@ def launchNode(self_port, peer_port, window_size, emulation_mode, emulation_valu
                                 deterministicallyDropped = True
                                 
                         if(deterministicallyDropped==True or probabilisticallyDropped==True):
-                            reserve_printer()
-                            #print ("modulo: %d, prob drop: %s" %((int(message["sequence"] + 1) % int(deterministicValue)),probabilisticallyDropped))
-                            print("[%s] packet%d %s discarded" % (repr(time.time()), message["sequence"], message["data"]))
-                            release_printer()
-                            lostPacketCounter=lostPacketCounter+1
-                            packetCount=packetCount+1    
+                            if(expectedseqnum==message["sequence"]): 
+                                reserve_printer()
+                                #print ("modulo: %d, prob drop: %s" %((int(message["sequence"] + 1) % int(deterministicValue)),probabilisticallyDropped))
+                                print("[%s] packet%d %s discarded" % (repr(time.time()), message["sequence"], message["data"]))
+                                release_printer()
+                                lostPacketCounter=lostPacketCounter+1
+                                packetCount=packetCount+1    
                         else:
-                            reserve_printer()
-                            #print ("detvalue: %d, modulo: %d, prob drop: %s" %(int(deterministicValue),(int(message["sequence"] + 1) % int(deterministicValue)),probabilisticallyDropped))
-                            print("[%s] packet%d %s received" % (repr(time.time()), message["sequence"], message["data"]))
-                            release_printer()
-                            packetCount=packetCount+1
-                                
                             if(expectedseqnum==message["sequence"]): 
                                 #print ("Counter: %d. Modulo: %d " %(detPacketCounter,(int(detPacketCounter) % int(deterministicValue))))
                                     if message["fin"]== "yes":
@@ -234,12 +230,15 @@ def launchNode(self_port, peer_port, window_size, emulation_mode, emulation_valu
                                         message["fin"]="printSummary"
                                         expectedseqnum=message["sequence"] + 1
                                         senderSideSocket.sendto(json.dumps(message), (self_ip, int(peer_port)))
-                                        time.sleep(2.5)
+                                        time.sleep(1)
+                                        while timerOn == True:
+                                            time.sleep(1)
                                         reserve_printer()
-                                        print("[%s] ACK%d sent, expecting packet%s" % (repr(time.time()), message["sequence"], expectedseqnum))
+                                        print("[%s] Last ACK%d sent" % (repr(time.time()), message["sequence"]))
                                         print ("[Summary] %d/%d packets dropped, loss rate = %d%%" %(lostPacketCounter,packetCount,lostPacketCounter*100/packetCount))
                                         release_printer()
-                                        time.sleep(1)
+                                        
+                                        
 
                                         baseseqnum = 0
                                         nextseqnum = 0
@@ -256,6 +255,12 @@ def launchNode(self_port, peer_port, window_size, emulation_mode, emulation_valu
                                                                                 
                                     #Send ACK
                                     else:
+                                        reserve_printer()
+                                        #print ("detvalue: %d, modulo: %d, prob drop: %s" %(int(deterministicValue),(int(message["sequence"] + 1) % int(deterministicValue)),probabilisticallyDropped))
+                                        print("[%s] packet%d %s received" % (repr(time.time()), message["sequence"], message["data"]))
+                                        release_printer()
+                                        packetCount=packetCount+1
+                            
                                         receivedSequence = message["sequence"]
                                         expectedseqnum = message["sequence"] + 1
                                         message["data"] = None
@@ -289,15 +294,18 @@ def launchNode(self_port, peer_port, window_size, emulation_mode, emulation_valu
                         if (emulation_mode == "-d" or emulation_mode == "-p"):                        
                             if message["fin"]== "printSummary":
                                     buffer[baseseqnum]["Acked"]="yes"
+                                    timerOn=False
                                     baseseqnum = baseseqnum + 1
                                     AckCount=AckCount+1
-                                    time.sleep(2.5)
+                                    time.sleep(1)
+                                    while timerOn == True:
+                                            time.sleep(1)
                                     reserve_printer()
                                     print("[%s] ACK%d received, window moves to %d" % (repr(time.time()), message["sequence"], 0))
                                     print ("[Summary] %d/%d packets discarded, loss rate = %d%%" %(lostPacketCounter,AckCount,lostPacketCounter*100/AckCount))
                                     release_printer()
                                     
-                                    time.sleep(1)
+                                    
                                     
                                     baseseqnum = 0
                                     nextseqnum = 0
@@ -326,8 +334,8 @@ def launchNode(self_port, peer_port, window_size, emulation_mode, emulation_valu
                                 
                                 #print "ACK received is %d, Next is: %d, base is: %d" %(message["sequence"],nextseqnum,baseseqnum)
                                 if((int(message["sequence"])) == baseseqnum): 
-                                    #timerOn = False
                                     buffer[baseseqnum]["Acked"]="yes"
+                                    timerOn = False
                                     baseseqnum = baseseqnum + 1
                                     reserve_printer()
                                     print("[%s] ACK%d received, window moves to %d" % (repr(time.time()), message["sequence"], baseseqnum))
@@ -343,6 +351,7 @@ def launchNode(self_port, peer_port, window_size, emulation_mode, emulation_valu
                                               
                                     while (AckGap != 0):
                                         buffer[(baseseqnum-AckGap)]["Acked"]="yes"
+                                        timerOn=False
                                         AckGap = AckGap - 1
                                         baseseqnum = baseseqnum + 1
                                         reserve_printer()

@@ -14,19 +14,18 @@ from platform import node
 argList = []  # Argument parser
 readyToPrint = True
 
-neighborsNodes = {} 
-routingTableEntry = {"NeighborNode": 0, "Distance": 0, "NextHop": 0}
 nodeRoutingTable = {}
 # Read all arguments into a list, with error handling
 for eachArg in sys.argv:   
         argList.append(eachArg)
-    
-    # error handling
 
+print argList
 
 selfPort = int(argList[1])
 argList.pop(0)
-argList.pop(1)
+argList.pop(0)
+print selfPort
+print argList
 
 neighborDistance = argList[1::2]
 neighborNodes = argList[0::2]
@@ -41,10 +40,8 @@ for i in neighborNodes:
         neighborId = count 
         nodeRoutingTable[count] = {}
         nodeRoutingTable[neighborId]["Node"] = i
-
-        
         count+=1
-print nodeRoutingTable
+
 
 count = 0
 for i in nodeRoutingTable:

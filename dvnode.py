@@ -53,7 +53,7 @@ def release_printer():
 def initialize_self_table():
     for i in neighborNodes:
             #initialize routing Table Structure
-            routingTableStructure = {"TargetNode": 0,"SourceNode":0,"Distance":999999999, "NextHop": None, "isTargetAndSourceNeighbors": True, "nodeExists": None}
+            routingTableStructure = {"TargetNode": 0,"SourceNode":0,"Distance":9, "NextHop": None, "isTargetAndSourceNeighbors": True, "nodeExists": None}
             
             routingTableStructure["SourceNode"] = self_port
             routingTableStructure["TargetNode"] = int(i)
@@ -70,7 +70,10 @@ def print_table():
     print("[%s] Node %d Routing Table " % (repr(time.time()), self_port))
     
     for i in SelfRoutingTable:
-        print " - (%f) -> Node %d" %(i["Distance"],i["TargetNode"])
+        if i["NextHop"]==None:
+            print " - (%f) -> Node %d" %(i["Distance"],i["TargetNode"])
+        else:
+            print " - (%f) -> Node %d' Next hop -> Node %d" %(i["Distance"],i["TargetNode"],i["NextHop"])
 
 def send_table_to_neighbors():
     # Create a UDP datagram socket for the client
@@ -114,17 +117,17 @@ def receiver_processing():
             
             #Mark a node as existing
             for i in message:
-                i["nodeExists"]==False
+                i["nodeExists"]=False
                 for j in SelfRoutingTable:
                     if i["TargetNode"]==j["TargetNode"]:
-                        i["nodeExists"]==True
+                        i["nodeExists"]=True
             
-            #print message
+            print message
             
             for i in message:
                 # Add new node to SelfRoutingTable
-                if i["nodeExists"]==False:
-                    routingTableStructure = {"TargetNode": 0,"SourceNode":0,"Distance":999999999, "NextHop": None, "isTargetAndSourceNeighbors": False, "nodeExists": None}
+                if i["nodeExists"]==False and int(i["TargetNode"])!=self_port:
+                    routingTableStructure = {"TargetNode": 0,"SourceNode":0,"Distance":9, "NextHop": None, "isTargetAndSourceNeighbors": False, "nodeExists": None}
                     
                     routingTableStructure["SourceNode"] = self_port
                     routingTableStructure["TargetNode"] = int(i["TargetNode"])
@@ -132,7 +135,7 @@ def receiver_processing():
                     routingTableStructure["nodeExists"] = True
                     SelfRoutingTable.append(routingTableStructure)
             
-            
+                    print print_table()
             
             if firstTimeReceiving==True:
                 #print firstTimeReceiving

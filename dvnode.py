@@ -126,7 +126,7 @@ def receiver_processing():
             #print message
             
             for i in message:
-                if int(i["TargetNode"])!=self_port:
+                if int(i["TargetNode"])==self_port:
                     1;
                 # Add new node to SelfRoutingTable, set distance to maximum
                 elif i["nodeExists"]==False:

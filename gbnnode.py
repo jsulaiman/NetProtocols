@@ -422,7 +422,7 @@ for eachArg in sys.argv:
     
     # error handling
 try:
-        selfPort = int(argList[1])
+        self_port = int(argList[1])
         peerPort = int(argList[2])
         windowSize = int(argList[3])
         emulationMode = argList[4]
@@ -441,7 +441,7 @@ elif emulationMode != "-d" and emulationMode != "-p":
         exit
         
 else:
-    launchNode(selfPort, peerPort, windowSize, emulationMode, emulationValue)
+    launchNode(self_port, peerPort, windowSize, emulationMode, emulationValue)
         
 
 

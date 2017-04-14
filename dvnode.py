@@ -53,7 +53,7 @@ def release_printer():
 def initialize_self_table():
     for i in neighborNodes:
             #initialize routing Table Structure
-            routingTableStructure = {"TargetNode": 0,"SourceNode":0,"Distance":9, "NextHop": None, "isTargetAndSourceNeighbors": True, "nodeExists": None}
+            routingTableStructure = {"TargetNode": 0,"SourceNode":0,"Distance":9, "NextHop": None, "isTargetAndSourceNeighbors": True, "nodeExists": None, "DistToNextHop": 0}
             
             routingTableStructure["SourceNode"] = self_port
             routingTableStructure["TargetNode"] = int(i)
@@ -73,7 +73,7 @@ def print_table():
         if i["NextHop"]==None:
             print " - (%f) -> Node %d" %(i["Distance"],i["TargetNode"])
         else:
-            print " - (%f) -> Node %d' Next hop -> Node %d" %(i["Distance"],i["TargetNode"],i["NextHop"])
+            print " - (%f) -> Node %d; Next hop -> Node %d" %(i["Distance"],i["TargetNode"],i["NextHop"])
 
 def send_table_to_neighbors():
     # Create a UDP datagram socket for the client
@@ -121,22 +121,41 @@ def receiver_processing():
                 for j in SelfRoutingTable:
                     if i["TargetNode"]==j["TargetNode"]:
                         i["nodeExists"]=True
-            
-            print message
+                    if i["TargetNode"]==j["SourceNode"]:
+                        thisNeighborDistance=i["Distance"]
+            #print message
             
             for i in message:
-                # Add new node to SelfRoutingTable
-                if i["nodeExists"]==False and int(i["TargetNode"])!=self_port:
-                    routingTableStructure = {"TargetNode": 0,"SourceNode":0,"Distance":9, "NextHop": None, "isTargetAndSourceNeighbors": False, "nodeExists": None}
+                if int(i["TargetNode"])!=self_port:
+                    1;
+                # Add new node to SelfRoutingTable, set distance to maximum
+                elif i["nodeExists"]==False:
+                    
+                    routingTableStructure = {"TargetNode": 0,"SourceNode":0,"Distance":9, "NextHop": None, "isTargetAndSourceNeighbors": False, "nodeExists": None, "DistToNextHop": 0}
                     
                     routingTableStructure["SourceNode"] = self_port
                     routingTableStructure["TargetNode"] = int(i["TargetNode"])
                     routingTableStructure["NextHop"] = int(i["SourceNode"]) 
                     routingTableStructure["nodeExists"] = True
+                    routingTableStructure["DistToNextHop"]=thisNeighborDistance
                     SelfRoutingTable.append(routingTableStructure)
             
                     print print_table()
-            
+                    
+                # Start Bellman-Ford algorithm
+                elif i["nodeExists"]==True:
+                    #===========================================================
+                    # for j in SelfRoutingTable:
+                    #     if i["SourceNode"]==j["TargetNode"] and i["TargetNode"]==j["SourceNode"]:
+                    #     currentNeighborDistance = j["Distance"]
+                    #===========================================================
+                    for j in SelfRoutingTable:
+                        if i["TargetNode"]==j["TargetNode"]:
+                            if (i["Distance"]+thisNeighborDistance)<j["Distance"]:
+                                j["Distance"]=i["Distance"]+thisNeighborDistance
+                                j["NextHop"]=i["SourceNode"]
+                                print print_table()
+                        
             if firstTimeReceiving==True:
                 #print firstTimeReceiving
                 firstTimeReceiving=False

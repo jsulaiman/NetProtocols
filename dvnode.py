@@ -14,6 +14,7 @@ readyToPrint = True
 isLastNode = False
 sendToNeighbors=False
 SelfRoutingTable =[]
+firstTimeReceiving = True
 # Read all arguments into a list, with error handling
 for eachArg in sys.argv:   
         argList.append(eachArg)
@@ -28,6 +29,7 @@ neighborNodes = argList[0::2]
 
 if neighborNodes[len(neighborNodes)-1]=="last":
     isLastNode = True
+    firstTimeReceiving=False
     neighborNodes.pop()
     
 if len(neighborNodes) > 16:
@@ -72,24 +74,24 @@ def print_table():
 
 def send_table_to_neighbors():
     # Create a UDP datagram socket for the client
-
     for i in SelfRoutingTable:
         if i["isTargetAndSourceNeighbors"]==True:
             reserve_printer()
-            print("[%s] Message sent from Node %d to Node %d" %(repr(time.time()), self_port,i["TargetNode"]))
+            print("[%s] Message sent from Node %d to Node %d" %(repr(time.time()), self_port,int(i["TargetNode"])))
             senderSideSocket.sendto(json.dumps(SelfRoutingTable), (self_ip, int(i["TargetNode"])))
             release_printer()
 
 def receiver_processing():
     global sendToNeighbors
+    global firstTimeReceiving
     senderPort = None
     
     def update_table():
         for i in SelfRoutingTable:
             1;
-        print message
-        print SelfRoutingTable
-        print print_table()
+        #print message
+        #print SelfRoutingTable
+        #print print_table()
     
     while True:
         incomingPacket = None
@@ -101,9 +103,11 @@ def receiver_processing():
         # Ignores packets sent from self
         if senderPort == self_port:
             print 1;
-           
+        
+        # Process table updates according to Bellman-Ford
         elif incomingPacket:
             message = json.loads(incomingPacket)
+            #message = incomingPacket
             print("[%s] Message received at Node %d from Node %d" %(repr(time.time()), self_port,senderPort))
             
             #Add any new node to SelfRoutingTable
@@ -115,13 +119,25 @@ def receiver_processing():
                     if i["TargetNode"]==j["TargetNode"]:
                         i["nodeExists"]==True
             
-            for i in message:
-                if i["nodeExists"]==False:
-                    SelfRoutingTable.append(i)
-                    routingTableStructure["SourceNode"] = self_port
-
+            #print message
             
-            print update_table()
+            for i in message:
+                # Add new node to SelfRoutingTable
+                if i["nodeExists"]==False:
+                    routingTableStructure = {"TargetNode": 0,"SourceNode":0,"Distance":999999999, "NextHop": None, "isTargetAndSourceNeighbors": False, "nodeExists": None}
+                    
+                    routingTableStructure["SourceNode"] = self_port
+                    routingTableStructure["TargetNode"] = int(i["TargetNode"])
+                    routingTableStructure["NextHop"] = int(i["SourceNode"]) 
+                    routingTableStructure["nodeExists"] = True
+                    SelfRoutingTable.append(routingTableStructure)
+            
+            
+            
+            if firstTimeReceiving==True:
+                #print firstTimeReceiving
+                firstTimeReceiving=False
+                send_table_to_neighbors()
             #print SelfRoutingTable
     
 initialize_self_table()

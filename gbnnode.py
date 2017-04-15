@@ -235,7 +235,7 @@ def launchNode(self_port, peer_port, window_size, emulation_mode, emulation_valu
                                             time.sleep(1)
                                         reserve_printer()
                                         print("[%s] Last ACK%d sent" % (repr(time.time()), message["sequence"]))
-                                        print ("[Summary] %d/%d packets dropped, loss rate = %d%%" %(lostPacketCounter,packetCount,lostPacketCounter*100/packetCount))
+                                        print ("[Summary] %d/%d packets dropped, loss rate = %s%%" %(lostPacketCounter,packetCount,format(float(lostPacketCounter)*100/packetCount,".2f")))
                                         release_printer()
                                         
                                         
@@ -302,7 +302,7 @@ def launchNode(self_port, peer_port, window_size, emulation_mode, emulation_valu
                                             time.sleep(1)
                                     reserve_printer()
                                     print("[%s] ACK%d received, window moves to %d" % (repr(time.time()), message["sequence"], 0))
-                                    print ("[Summary] %d/%d packets discarded, loss rate = %d%%" %(lostPacketCounter,AckCount,lostPacketCounter*100/AckCount))
+                                    print ("[Summary] %d/%d packets discarded, loss rate = %s%%" %(lostPacketCounter,AckCount,format(float(lostPacketCounter)*100/AckCount,".2f")))
                                     release_printer()
                                     
                                     

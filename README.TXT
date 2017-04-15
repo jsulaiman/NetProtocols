@@ -26,9 +26,11 @@ At the start of the program the entries inputted by the user using the <send> co
 The program utilizes multithreading; one thread to listen for incoming packets, and another to perform timeout and sending/resending mechanism.
 
 B. dvnode.py: A graph based program utilizing Bellman-Ford distance vector algorithm, where graph: G = (N,E). Where N is a set of routers = {u,v,w,x,y,z} and E is a set of links = {(u,v),(u,x),(v,x),(v,w),(x,w),(x,y),(w,y),(w,z),(y,z)}
-   c(w,z) is the cost of the link.
+   c(w,z) is the cost of the link. At initialization the nodes involved send their routing table to its immediate neighbor. These tables are then evaluated using Bellman-Ford algorithm. There are two operations: 1) If a new node is 
+   discovered in the incoming routing table, it gets added to the receiving node's routing table. 2) Distances in the incoming routing table is then calculated against the receiving node's routing table. If the incoming distance is
+   shorter, then the receiver routing table's distance and next hop information is updated.
 
-USAGE SCENARIOS
+
 
 ALGORITHM AND DATA STRUCTURES EXPLANATION
 GBNNODE.PY: 

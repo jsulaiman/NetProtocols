@@ -73,9 +73,9 @@ def print_table():
     
     for i in SelfRoutingTable:
         if i["NextHop"]==None:
-            print " - (%f) -> Node %d" %(i["Distance"],i["TargetNode"])
+            print " - (%s) -> Node %d" %(format(i["Distance"],".1f"),i["TargetNode"])
         else:
-            print " - (%f) -> Node %d; Next hop -> Node %d" %(i["Distance"],i["TargetNode"],i["NextHop"])
+            print " - (%s) -> Node %d; Next hop -> Node %d" %(format(i["Distance"],".1f"),i["TargetNode"],i["NextHop"])
 
 def send_table_to_neighbors():
     # Create a UDP datagram socket for the client
@@ -120,11 +120,11 @@ def receiver_processing():
                     if j["TargetNode"]==i["SourceNode"]and i["TargetNode"]!=i["SourceNode"]:
                         thisNeighborDistance=j["Distance"]
                         for k in neighborList:
-                             if i["TargetNode"]==j["SourceNode"]:
-                                 if i["NextHop"]!=None:
-                                     NextHopIsNeighbor=True
-                                     NextHopNeighbor=i["NextHop"]
-                                     #print "NextHop: ", NextHopNeighbor
+                            if i["TargetNode"]==j["SourceNode"]:
+                                if i["NextHop"]!=None and i["NextHop"]==k:
+                                    NextHopIsNeighbor=True
+                                    NextHopNeighbor=i["NextHop"]
+                                    #print "NextHop: ", NextHopNeighbor
             #print message
             
             for i in message:

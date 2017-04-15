@@ -14,6 +14,7 @@ readyToPrint = True
 isLastNode = False
 sendToNeighbors=False
 SelfRoutingTable =[]
+neighborList=[]
 firstTimeReceiving = True
 # Read all arguments into a list, with error handling
 for eachArg in sys.argv:   
@@ -59,6 +60,7 @@ def initialize_self_table():
             routingTableStructure["TargetNode"] = int(i)
             routingTableStructure["nodeExists"] = True
             SelfRoutingTable.append(routingTableStructure)
+            neighborList.append(routingTableStructure["TargetNode"])
     
     count = 0
     for i in SelfRoutingTable:
@@ -88,14 +90,8 @@ def receiver_processing():
     global sendToNeighbors
     global firstTimeReceiving
     senderPort = None
-    
-    def update_table():
-        for i in SelfRoutingTable:
-            1;
-        #print message
-        #print SelfRoutingTable
-        #print print_table()
-    
+    NextHopIsNeighbor=False
+
     while True:
         incomingPacket = None
         try:
@@ -121,8 +117,12 @@ def receiver_processing():
                 for j in SelfRoutingTable:
                     if i["TargetNode"]==j["TargetNode"]:
                         i["nodeExists"]=True
-                    if i["TargetNode"]==j["SourceNode"]:
+                    if i["TargetNode"]==j["SourceNode"]and i["TargetNode"]!=i["SourceNode"]:
                         thisNeighborDistance=i["Distance"]
+                        for k in neighborList:
+                            if i["NextHop"]==k:
+                                NextHopIsNeighbor=True
+                                NextHopNeighbor=i["NextHop"]
             #print message
             
             for i in message:
@@ -152,9 +152,18 @@ def receiver_processing():
                     for j in SelfRoutingTable:
                         if i["TargetNode"]==j["TargetNode"]:
                             if (i["Distance"]+thisNeighborDistance)<j["Distance"]:
+                                print ("routing source:%d ,old distance: %f, new distance to %d: %f , neighbor's distance to %d: %f, neighbor's next hop:%s" 
+                                       %(i["SourceNode"],j["Distance"],j["TargetNode"],i["Distance"]+thisNeighborDistance,j["SourceNode"],thisNeighborDistance,str(i["NextHop"])))
                                 j["Distance"]=i["Distance"]+thisNeighborDistance
-                                j["NextHop"]=i["SourceNode"]
+                                
+                                
+                                if i["NextHop"]!=None and NextHopIsNeighbor==True:
+                                    j["NextHop"]=NextHopNeighbor
+                                
+                                else:
+                                    j["NextHop"]=i["SourceNode"]
                                 print print_table()
+                                send_table_to_neighbors()
                         
             if firstTimeReceiving==True:
                 #print firstTimeReceiving

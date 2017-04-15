@@ -101,7 +101,7 @@ def receiver_processing():
         
         # Ignores packets sent from self
         if senderPort == self_port:
-            print 1;
+            1;
         
         # Process table updates according to Bellman-Ford
         elif incomingPacket:
@@ -142,7 +142,7 @@ def receiver_processing():
                     routingTableStructure["DistToNextHop"]=thisNeighborDistance
                     SelfRoutingTable.append(routingTableStructure)
             
-                    print print_table()
+                    print_table()
                     
                 # Start Bellman-Ford algorithm
                 elif i["nodeExists"]==True:
@@ -164,7 +164,7 @@ def receiver_processing():
                                 
                                 else:
                                     j["NextHop"]=i["SourceNode"]
-                                print print_table()
+                                print_table()
                                 send_table_to_neighbors()
                         
             if firstTimeReceiving==True:

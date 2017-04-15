@@ -1,3 +1,120 @@
+dvnode test:
+[1492244900.77] Node 4444 Routing Table 
+ - (0.8) -> Node 2222
+ - (0.5) -> Node 3333
+[1492244900.77] Message sent from Node 4444 to Node 2222
+[1492244900.77] Message sent from Node 4444 to Node 3333
+[1492244900.786] Message received at Node 4444 from Node 2222
+[1492244900.786] Node 4444 Routing Table 
+ - (0.8) -> Node 2222
+ - (0.5) -> Node 3333
+ - (9.0) -> Node 1111; Next hop -> Node 2222
+[1492244900.787] Message received at Node 4444 from Node 3333
+[1492244900.787] Node 4444 Routing Table 
+ - (0.8) -> Node 2222
+ - (0.5) -> Node 3333
+ - (1.0) -> Node 1111; Next hop -> Node 3333
+[1492244900.787] Message sent from Node 4444 to Node 2222
+[1492244900.787] Message sent from Node 4444 to Node 3333
+[1492244900.787] Node 4444 Routing Table 
+ - (0.7) -> Node 2222; Next hop -> Node 3333
+ - (0.5) -> Node 3333
+ - (1.0) -> Node 1111; Next hop -> Node 3333
+[1492244900.787] Message sent from Node 4444 to Node 2222
+[1492244900.787] Message sent from Node 4444 to Node 3333
+[1492244900.787] Message received at Node 4444 from Node 2222
+[1492244900.787] Node 4444 Routing Table 
+ - (0.7) -> Node 2222; Next hop -> Node 3333
+ - (0.5) -> Node 3333
+ - (0.8) -> Node 1111; Next hop -> Node 3333
+[1492244900.787] Message sent from Node 4444 to Node 2222
+[1492244900.787] Message sent from Node 4444 to Node 3333
+[1492244900.787] Message received at Node 4444 from Node 3333
+
+[1492244894.84] Node 1111 Routing Table 
+ - (0.1) -> Node 2222
+ - (0.5) -> Node 3333
+[1492244900.786] Message received at Node 1111 from Node 2222
+[1492244900.786] Node 1111 Routing Table 
+ - (0.1) -> Node 2222
+ - (0.3) -> Node 3333; Next hop -> Node 2222
+[1492244900.786] Message sent from Node 1111 to Node 2222
+[1492244900.786] Message sent from Node 1111 to Node 3333
+[1492244900.787] Node 1111 Routing Table 
+ - (0.1) -> Node 2222
+ - (0.3) -> Node 3333; Next hop -> Node 2222
+ - (9.0) -> Node 4444; Next hop -> Node 2222
+[1492244900.787] Message sent from Node 1111 to Node 2222
+[1492244900.787] Message sent from Node 1111 to Node 3333
+[1492244900.787] Message received at Node 1111 from Node 3333
+[1492244900.787] Node 1111 Routing Table 
+ - (0.1) -> Node 2222
+ - (0.3) -> Node 3333; Next hop -> Node 2222
+ - (0.8) -> Node 4444; Next hop -> Node 3333
+[1492244900.787] Message sent from Node 1111 to Node 2222
+[1492244900.787] Message sent from Node 1111 to Node 3333
+[1492244900.787] Message received at Node 1111 from Node 2222
+[1492244900.787] Node 1111 Routing Table 
+ - (0.1) -> Node 2222
+ - (0.3) -> Node 3333; Next hop -> Node 2222
+ - (0.8) -> Node 4444; Next hop -> Node 2222
+[1492244900.787] Message sent from Node 1111 to Node 2222
+[1492244900.787] Message sent from Node 1111 to Node 3333
+[1492244900.787] Message received at Node 1111 from Node 3333
+
+[1492244897.014] Node 2222 Routing Table 
+ - (0.1) -> Node 1111
+ - (0.2) -> Node 3333
+ - (0.8) -> Node 4444
+[1492244900.77] Message received at Node 2222 from Node 4444
+[1492244900.77] Message sent from Node 2222 to Node 1111
+[1492244900.786] Message sent from Node 2222 to Node 3333
+[1492244900.786] Message sent from Node 2222 to Node 4444
+[1492244900.786] Message received at Node 2222 from Node 3333
+[1492244900.786] Node 2222 Routing Table 
+ - (0.1) -> Node 1111
+ - (0.2) -> Node 3333
+ - (0.7) -> Node 4444; Next hop -> Node 3333
+[1492244900.786] Message sent from Node 2222 to Node 1111
+[1492244900.787] Message sent from Node 2222 to Node 3333
+[1492244900.787] Message sent from Node 2222 to Node 4444
+[1492244900.787] Message received at Node 2222 from Node 1111
+[1492244900.787] Message received at Node 2222 from Node 4444
+[1492244900.787] Message received at Node 2222 from Node 1111
+[1492244900.787] Message received at Node 2222 from Node 3333
+[1492244900.787] Message received at Node 2222 from Node 4444
+[1492244900.787] Message received at Node 2222 from Node 1111
+[1492244900.787] Message received at Node 2222 from Node 4444
+[1492244900.787] Message received at Node 2222 from Node 1111
+
+[1492244899.085] Node 3333 Routing Table 
+ - (0.5) -> Node 1111
+ - (0.2) -> Node 2222
+ - (0.5) -> Node 4444
+[1492244900.786] Message received at Node 3333 from Node 4444
+[1492244900.786] Message sent from Node 3333 to Node 1111
+[1492244900.786] Message sent from Node 3333 to Node 2222
+[1492244900.786] Message sent from Node 3333 to Node 4444
+[1492244900.787] Message received at Node 3333 from Node 2222
+[1492244900.787] Node 3333 Routing Table 
+ - (0.3) -> Node 1111; Next hop -> Node 2222
+ - (0.2) -> Node 2222
+ - (0.5) -> Node 4444
+[1492244900.787] Message sent from Node 3333 to Node 1111
+[1492244900.787] Message sent from Node 3333 to Node 2222
+[1492244900.787] Message sent from Node 3333 to Node 4444
+[1492244900.787] Message received at Node 3333 from Node 1111
+[1492244900.787] Message received at Node 3333 from Node 2222
+[1492244900.787] Message received at Node 3333 from Node 4444
+[1492244900.787] Message received at Node 3333 from Node 1111
+[1492244900.787] Message received at Node 3333 from Node 4444
+[1492244900.787] Message received at Node 3333 from Node 1111
+[1492244900.787] Message received at Node 3333 from Node 4444
+[1492244900.787] Message received at Node 3333 from Node 1111
+
+
+
+
 ===========
 Probabilistic Test, 1152 characters.
 Sender: 1111 2222 5 -p 0.1

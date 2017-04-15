@@ -30,8 +30,6 @@ B. dvnode.py: A graph based program utilizing Bellman-Ford distance vector algor
    discovered in the incoming routing table, it gets added to the receiving node's routing table. 2) Distances in the incoming routing table is then calculated against the receiving node's routing table. If the incoming distance is
    shorter, then the receiver routing table's distance and next hop information is updated.
 
-
-
 ALGORITHM AND DATA STRUCTURES EXPLANATION
 GBNNODE.PY: 
 * The packet in gbnnode.py is implemented using a list of dictionaries.
@@ -46,6 +44,11 @@ will be resent, and the timer restarted.
 * The timer starts after the fi
 * The receiver only sends an ACK when it receives an expected, in-order packet from the receiver. If not, it will do nothing.
 * json is imported to assist in sending and receiving packets in json format
+
+DVNODE.PY: 
+The routing table in DVNODE is a list that contains dictionaries. Each dictionary contains information about Sender Node, Target Node, Distance between them, Next Hop information (if any), and some operational flags to aid with the 
+computation of the Bellman-Ford algorithm. Sending and receiving uses UDP, and is transmitted as json objects. The Bellman-Ford algorithm first initializes the graph by having the nodes send routing information to their neighbors,
+and afterwards iterating through a distance minimization calculation, and updating their local tables accordingly.
 
 ADDITIONAL FEATURES/FUNCTIONS
 

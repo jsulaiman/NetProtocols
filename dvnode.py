@@ -117,12 +117,14 @@ def receiver_processing():
                 for j in SelfRoutingTable:
                     if i["TargetNode"]==j["TargetNode"]:
                         i["nodeExists"]=True
-                    if i["TargetNode"]==j["SourceNode"]and i["TargetNode"]!=i["SourceNode"]:
-                        thisNeighborDistance=i["Distance"]
+                    if j["TargetNode"]==i["SourceNode"]and i["TargetNode"]!=i["SourceNode"]:
+                        thisNeighborDistance=j["Distance"]
                         for k in neighborList:
-                            if i["NextHop"]==k:
-                                NextHopIsNeighbor=True
-                                NextHopNeighbor=i["NextHop"]
+                             if i["TargetNode"]==j["SourceNode"]:
+                                 if i["NextHop"]!=None:
+                                     NextHopIsNeighbor=True
+                                     NextHopNeighbor=i["NextHop"]
+                                     #print "NextHop: ", NextHopNeighbor
             #print message
             
             for i in message:
@@ -152,12 +154,12 @@ def receiver_processing():
                     for j in SelfRoutingTable:
                         if i["TargetNode"]==j["TargetNode"]:
                             if (i["Distance"]+thisNeighborDistance)<j["Distance"]:
-                                print ("routing source:%d ,old distance: %f, new distance to %d: %f , neighbor's distance to %d: %f, neighbor's next hop:%s" 
-                                       %(i["SourceNode"],j["Distance"],j["TargetNode"],i["Distance"]+thisNeighborDistance,j["SourceNode"],thisNeighborDistance,str(i["NextHop"])))
+                                #print ("routing source:%d ,old distance: %f, new distance to %d: %f , neighbor's distance to %d: %f, neighbor's next hop:%s" 
+                                #       %(i["SourceNode"],j["Distance"],j["TargetNode"],i["Distance"]+thisNeighborDistance,j["SourceNode"],thisNeighborDistance,str(i["NextHop"])))
                                 j["Distance"]=i["Distance"]+thisNeighborDistance
                                 
                                 
-                                if i["NextHop"]!=None and NextHopIsNeighbor==True:
+                                if NextHopIsNeighbor==True:
                                     j["NextHop"]=NextHopNeighbor
                                 
                                 else:

@@ -238,19 +238,17 @@ def launchNode(self_port, peer_port, window_size, emulation_mode, emulation_valu
                                         print ("[Summary] %d/%d packets dropped, loss rate = %s" %(lostPacketCounter,packetCount,format(float(lostPacketCounter)/packetCount,".2f")))
                                         release_printer()
                                         
-                                        #=======================================
-                                        # baseseqnum = 0
-                                        # nextseqnum = 0
-                                        # expectedseqnum = 0
-                                        # bufferLength = 0
-                                        # stopSending = False
-                                        # lostPacketCounter = 0
-                                        # packetCount = 0
-                                        # AckCount = 0
-                                        # buffer = []
-                                        # timerOn = False
-                                        # process_send()
-                                        #=======================================
+                                        baseseqnum = 0
+                                        nextseqnum = 0
+                                        expectedseqnum = 0
+                                        bufferLength = 0
+                                        stopSending = False
+                                        lostPacketCounter = 0
+                                        packetCount = 0
+                                        AckCount = 0
+                                        buffer = []
+                                        timerOn = False
+                                        process_send()
                                                                                 
                                     #Send ACK
                                     else:
@@ -307,23 +305,21 @@ def launchNode(self_port, peer_port, window_size, emulation_mode, emulation_valu
                                     print ("[Summary] %d/%d packets discarded, loss rate = %s" %(lostPacketCounter,AckCount,format(float(lostPacketCounter)/AckCount,".2f")))
                                     release_printer()
 
-                                    #===========================================
-                                    # baseseqnum = 0
-                                    # nextseqnum = 0
-                                    # expectedseqnum = 0
-                                    # bufferLength = 0
-                                    # stopSending = False
-                                    # lostPacketCounter = 0
-                                    # packetCount = 0
-                                    # AckCount = 0
-                                    # buffer = []
-                                    # timerOn = False
-                                    # process_send()
-                                    #===========================================
+                                    baseseqnum = 0
+                                    nextseqnum = 0
+                                    expectedseqnum = 0
+                                    bufferLength = 0
+                                    stopSending = False
+                                    lostPacketCounter = 0
+                                    packetCount = 0
+                                    AckCount = 0
+                                    buffer = []
+                                    timerOn = False
+                                    process_send()
                                     
                                     #time.sleep(2)
                             # Emulate packet loss
-                            elif (deterministicallyDropped==True or probabilisticallyDropped==True):
+                            elif ((int(message["sequence"]) != 0) or deterministicallyDropped==True or probabilisticallyDropped==True):
                                 reserve_printer()
                                 print("[%s] ACK%d discarded" % (repr(time.time()), message["sequence"]))
                                 release_printer()
@@ -331,7 +327,7 @@ def launchNode(self_port, peer_port, window_size, emulation_mode, emulation_valu
                                 packetCount=packetCount+1
                                 AckCount=AckCount+1
                                 
-                            elif ((int(message["sequence"]) == 0) or deterministicallyDropped==False or probabilisticallyDropped == False):
+                            elif (deterministicallyDropped==False or probabilisticallyDropped == False):
                                 
                                 #print "ACK received is %d, Next is: %d, base is: %d" %(message["sequence"],nextseqnum,baseseqnum)
                                 if((int(message["sequence"])) == baseseqnum): 

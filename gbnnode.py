@@ -222,9 +222,11 @@ def launchNode(self_port, peer_port, window_size, emulation_mode, emulation_valu
                             if(expectedseqnum==message["sequence"]): 
                                 #print ("Counter: %d. Modulo: %d " %(detPacketCounter,(int(detPacketCounter) % int(deterministicValue))))
                                     if message["fin"]== "yes":
+                                        lastpacketnum=message["data"]
                                         message["data"] = None
                                         message["fin"]="printSummary"
                                         expectedseqnum=message["sequence"] + 1
+                                        packetCount=packetCount+1
                                         senderSideSocket.sendto(json.dumps(message), (self_ip, int(peer_port)))
                                         #=======================================
                                         # time.sleep(.01)
@@ -232,7 +234,7 @@ def launchNode(self_port, peer_port, window_size, emulation_mode, emulation_valu
                                         #     time.sleep(.01)
                                         #=======================================
                                         reserve_printer()
-                                        print("[%s] packet%d %s received" % (repr(time.time()), message["sequence"], message["data"]))
+                                        print("[%s] packet%d %s received" % (repr(time.time()), message["sequence"], lastpacketnum))
                                         print("[%s] ACK%d sent, expecting packet%s" % (repr(time.time()), message["sequence"], expectedseqnum))
                                         #print("[%s] Last ACK%d sent" % (repr(time.time()), message["sequence"]))
                                         print ("[Summary] %d/%d packets dropped, loss rate = %s" %(lostPacketCounter,packetCount,format(float(lostPacketCounter)/packetCount,".2f")))
@@ -269,7 +271,18 @@ def launchNode(self_port, peer_port, window_size, emulation_mode, emulation_valu
                             elif (message["sequence"]>expectedseqnum): 
                                 1;
                             else:
-                                1;
+                                reserve_printer()
+                                #print ("detvalue: %d, modulo: %d, prob drop: %s" %(int(deterministicValue),(int(message["sequence"] + 1) % int(deterministicValue)),probabilisticallyDropped))
+                                print("[%s] packet%d %s received" % (repr(time.time()), message["sequence"], message["data"]))
+                                release_printer()
+                                packetCount=packetCount+1
+                    
+                                receivedSequence = message["sequence"]
+                                message["data"] = None
+                                senderSideSocket.sendto(json.dumps(message), (self_ip, int(peer_port)))
+                                reserve_printer()
+                                print("[%s] ACK%d sent, expecting packet%s" % (repr(time.time()), receivedSequence, expectedseqnum))
+                                release_printer()
                     
                     # SENDER SECTION
                     # Process incoming Ack as Sender
@@ -319,7 +332,7 @@ def launchNode(self_port, peer_port, window_size, emulation_mode, emulation_valu
                                     
                                     #time.sleep(2)
                             # Emulate packet loss
-                            elif ((int(message["sequence"]) != 0) or deterministicallyDropped==True or probabilisticallyDropped==True):
+                            elif ((int(message["sequence"]) != 0) and (deterministicallyDropped==True or probabilisticallyDropped==True)):
                                 reserve_printer()
                                 print("[%s] ACK%d discarded" % (repr(time.time()), message["sequence"]))
                                 release_printer()
@@ -328,7 +341,6 @@ def launchNode(self_port, peer_port, window_size, emulation_mode, emulation_valu
                                 AckCount=AckCount+1
                                 
                             elif (deterministicallyDropped==False or probabilisticallyDropped == False):
-                                
                                 #print "ACK received is %d, Next is: %d, base is: %d" %(message["sequence"],nextseqnum,baseseqnum)
                                 if((int(message["sequence"])) == baseseqnum): 
                                     buffer[baseseqnum]["Acked"]="yes"

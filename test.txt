@@ -154,79 +154,61 @@ Sender: 1111 2222 5 -p 0.1
 Receiver: 2222 1111 5 -p 0.1
 
 Sender log:
-node> send abcdefghijklm
-[1492324286.984] packet0 a sent
-[1492324286.99] ACK0 received, window moves to 1
-[1492324287.007] packet1 b sent
-[1492324287.007] ACK1 received, window moves to 2
-[1492324287.023] packet2 c sent
-[1492324287.023] ACK2 received, window moves to 3
-[1492324287.038] packet3 d sent
-[1492324287.038] ACK3 received, window moves to 4
-[1492324287.054] packet4 e sent
-[1492324287.054] ACK4 received, window moves to 5
-[1492324287.069] packet5 f sent
-[1492324287.072] ACK5 received, window moves to 6
-[1492324287.1] packet6 g sent
-[1492324287.1] ACK6 received, window moves to 7
-[1492324287.116] packet7 h sent
-[1492324287.131] packet8 i sent
-[1492324287.147] packet9 j sent
-[1492324287.163] packet10 k sent
-[1492324287.178] packet11 l sent
-[1492324287.979] packet7 timeout
-[1492324287.98] packet7 h sent
-[1492324287.981] packet8 i sent
-[1492324287.981] packet9 j sent
-[1492324287.982] packet10 k sent
-[1492324287.983] packet11 l sent
-[1492324288.832] packet7 timeout
-[1492324288.833] packet7 h sent
-[1492324288.834] packet8 i sent
-[1492324288.835] packet9 j sent
-[1492324288.836] packet10 k sent
-[1492324288.836] packet11 l sent
-[1492324288.852] ACK7 received, window moves to 8
-[1492324288.852] packet12 m sent
-[1492324288.867] ACK8 received, window moves to 9
-[1492324289.702] packet9 timeout
-[1492324289.702] packet9 j sent
-[1492324289.702] packet10 k sent
-[1492324289.702] packet11 l sent
-[1492324289.702] packet12 m sent
-[1492324289.718] ACK9 received, window moves to 10
-[1492324289.718] ACK10 received, window moves to 11
-[1492324289.718] ACK11 received, window moves to 12
-[1492324289.718] ACK12 received, window moves to 13
-[Summary] 0/13 packets discarded, loss rate = 0.00
+node> send abcdefgh
+[1492493104.028] packet0 a sent
+[1492493104.046] packet1 b sent
+[1492493104.062] packet2 c sent
+[1492493104.077] packet3 d sent
+[1492493104.093] packet4 e sent
+[1492493104.807] packet0 timeout
+[1492493104.807] packet0 a sent
+[1492493104.808] packet1 b sent
+[1492493104.808] packet2 c sent
+[1492493104.808] packet3 d sent
+[1492493104.809] packet4 e sent
+[1492493105.565] packet0 timeout
+[1492493105.566] packet0 a sent
+[1492493105.566] packet1 b sent
+[1492493105.567] packet2 c sent
+[1492493105.568] packet3 d sent
+[1492493105.568] packet4 e sent
+[1492493105.584] ACK0 received, window moves to 1
+[1492493105.585] packet5 f sent
+[1492493105.599] ACK1 received, window moves to 2
+[1492493105.6] packet6 g sent
+[1492493105.615] ACK2 received, window moves to 3
+[1492493105.616] packet7 h sent
+[1492493106.372] packet3 timeout
+[1492493106.374] packet3 d sent
+[1492493106.374] packet4 e sent
+[1492493106.375] packet5 f sent
+[1492493106.376] packet6 g sent
+[1492493106.376] packet7 h sent
+[1492493106.388] ACK3 received, window moves to 4
+[1492493106.389] ACK4 received, window moves to 5
+[1492493106.39] ACK5 discarded
+[1492493106.39] ACK6 received, window moves to 7
+[1492493106.391] ACK7 received, window moves to 7
+[Summary] 1/8 packets discarded, loss rate = 0.12
 
-Receiver log:node> [1492324286.984] packet0 a received
-[1492324286.99] ACK0 sent, expecting packet1
-[1492324287.007] packet1 b received
-[1492324287.007] ACK1 sent, expecting packet2
-[1492324287.023] packet2 c received
-[1492324287.023] ACK2 sent, expecting packet3
-[1492324287.038] packet3 d received
-[1492324287.038] ACK3 sent, expecting packet4
-[1492324287.054] packet4 e received
-[1492324287.054] ACK4 sent, expecting packet5
-[1492324287.071] packet5 f received
-[1492324287.071] ACK5 sent, expecting packet6
-[1492324287.1] packet6 g received
-[1492324287.1] ACK6 sent, expecting packet7
-[1492324287.116] packet7 h discarded
-[1492324287.981] packet7 h discarded
-[1492324288.834] packet7 h received
-[1492324288.835] ACK7 sent, expecting packet8
-[1492324288.835] packet8 i received
-[1492324288.836] ACK8 sent, expecting packet9
-[1492324288.836] packet9 j discarded
-[1492324289.702] packet9 j received
-[1492324289.702] ACK9 sent, expecting packet10
-[1492324289.702] packet10 k received
-[1492324289.702] ACK10 sent, expecting packet11
-[1492324289.702] packet11 l received
-[1492324289.702] ACK11 sent, expecting packet12
-[1492324289.702] packet12 None received
-[1492324289.702] ACK12 sent, expecting packet13
-[Summary] 3/15 packets dropped, loss rate = 0.20
+Receiver log:
+[1492493104.029] packet0 a discarded
+[1492493104.808] packet0 a discarded
+[1492493105.567] packet0 a received
+[1492493105.567] ACK0 sent, expecting packet1
+[1492493105.568] packet1 b received
+[1492493105.568] ACK1 sent, expecting packet2
+[1492493105.568] packet2 c received
+[1492493105.569] ACK2 sent, expecting packet3
+[1492493105.569] packet3 d discarded
+[1492493106.375] packet3 d received
+[1492493106.375] ACK3 sent, expecting packet4
+[1492493106.376] packet4 e received
+[1492493106.376] ACK4 sent, expecting packet5
+[1492493106.376] packet5 f received
+[1492493106.377] ACK5 sent, expecting packet6
+[1492493106.377] packet6 g received
+[1492493106.378] ACK6 sent, expecting packet7
+[1492493106.378] packet7 h received
+[1492493106.378] ACK7 sent, expecting packet8
+[Summary] 3/11 packets dropped, loss rate = 0.27

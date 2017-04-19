@@ -7,7 +7,6 @@ import threading
 import os
 import json
 import random
-from email.mime import base
 
 
 # A list of global variables to be used throughout the GBN program
@@ -82,7 +81,7 @@ def launchNode(self_port, peer_port, window_size, emulation_mode, emulation_valu
         while ((basebuffer < endWindow) and (basebuffer < bufferLength)):
                 if buffer[basebuffer]["Acked"]!="yes":
                     buffer[basebuffer]["Acked"]="no"
-                # The let ACK received message displayed first in printer
+                # To let ACK received message displayed first in printer
                 time.sleep(0.005)
                 reserve_printer()
                 print("[%s] packet%d %s sent" % (repr(time.time()), buffer[basebuffer]["sequence"], buffer[basebuffer]["data"]))
@@ -96,32 +95,40 @@ def launchNode(self_port, peer_port, window_size, emulation_mode, emulation_valu
         global nextseqnum
         global stopSending
         global timerOn
-        
+        endOfWindow=baseseqnum+window_size
         
         #print ("in send_packets. next: %d, base: %d, window: %d, bufferLength: %d" %(nextseqnum,baseseqnum,window_size,bufferLength))
-        while ((nextseqnum < bufferLength) and (nextseqnum < (baseseqnum + window_size)) ):
+        while ((nextseqnum < bufferLength) and (nextseqnum < endOfWindow) ):
                 #Adding if to defuse list index out of range bug
-                if nextseqnum != bufferLength:   
-                    buffer[nextseqnum]["Acked"]="no"
-                    #To let ACK message received display first in printer
-                    time.sleep(0.005)
+                
+                buffer[nextseqnum]["Acked"]="no"
+                #print buffer[nextseqnum]
+                
+                #To let ACK message received display first in printer
+                time.sleep(0.005)
+                #printnextsequence = buffer[nextseqnum]["sequence"]
+                #printnextdata = buffer[nextseqnum]["data"]
+                if nextseqnum < bufferLength:  
                     reserve_printer()
                     #print "base in send", baseseqnum
                     #print "next in send", nextseqnum
                     print ("baseseqnum: %d, nextseqnum: %d, bufferLength: %d,window: %d" %(baseseqnum, nextseqnum, bufferLength, window_size))
                     print("[%s] packet%d %s sent" % (repr(time.time()), buffer[nextseqnum]["sequence"], buffer[nextseqnum]["data"]))
-                    senderSideSocket.sendto(json.dumps(buffer[nextseqnum]), (self_ip, int(peer_port)))
                     release_printer()
-                    
-                    if(baseseqnum == nextseqnum):
-                        timerOn=False
-                        threadTimer = threading.Thread(target=start_timer)
-                        threadTimer.start()
+                    senderSideSocket.sendto(json.dumps(buffer[nextseqnum]), (self_ip, int(peer_port)))
+                
+                
+                if(baseseqnum == nextseqnum):
+                    timerOn=False
+                    threadTimer = threading.Thread(target=start_timer)
+                    threadTimer.start()
+                if nextseqnum < bufferLength:   
                     nextseqnum = nextseqnum + 1  
-                    #time.sleep(0.01)
-                else:
-                    print ("nextseqnum=bufferlength")
-                    timerOn = False
+                        #time.sleep(0.01)
+                #else:
+                    
+                    #print ("nextseqnum is equal to bufferlength")
+                #    timerOn = False
 
     def process_timeout():
         global baseseqnum
@@ -326,7 +333,7 @@ def launchNode(self_port, peer_port, window_size, emulation_mode, emulation_valu
                                     reserve_printer()
                                     print("[%s] ACK%d received, window moves to %d" % (repr(time.time()), message["sequence"], baseseqnum))
                                     release_printer()
-                                    # Turn off timer
+                                    # Turn off timer, let remaining incoming ACKs printed first
                                     
                                     time.sleep(1)
                                     reserve_printer()
@@ -365,11 +372,13 @@ def launchNode(self_port, peer_port, window_size, emulation_mode, emulation_valu
                                     release_printer()
                                     
                                     if baseseqnum != bufferLength:
+                                        #Timer restart with new window's packets sent
                                         if buffer[baseseqnum]["Acked"]!="":
                                             timerOn=False
                                             threadTimer = threading.Thread(target=start_timer)
                                             threadTimer.start()
                                             send_packets_in_window()
+                                        # If first packet is already on it's way but not ACKed, restart timer
                                         elif buffer[baseseqnum]["Acked"]=="no":
                                             timerOn=False
                                             threadTimer = threading.Thread(target=start_timer)
@@ -378,11 +387,13 @@ def launchNode(self_port, peer_port, window_size, emulation_mode, emulation_valu
                                     #time.sleep(0.01)
                                     #packetCount=packetCount+1
                                     AckCount=AckCount+1
+                                # Process cummulative ACKs
                                 elif((int(message["sequence"])) > baseseqnum and baseseqnum!=0):
                                     timerOn = False
                                     AckGap = (int(message["sequence"]) - baseseqnum)
                                     
                                     if baseseqnum != bufferLength:       
+                                        #Acknowledge all packets before this current Cummulative ACK
                                         while (AckGap != 0):
                                             buffer[(baseseqnum-AckGap)]["Acked"]="yes"
                                             #timerOn=False
@@ -392,6 +403,7 @@ def launchNode(self_port, peer_port, window_size, emulation_mode, emulation_valu
                                             print("[%s] ACK%d received, window moves to %d" % (repr(time.time()), (baseseqnum-AckGap), (baseseqnum-AckGap+1)))
                                             release_printer()
                                             AckCount=AckCount+1
+                                        #Now base is current
                                         if buffer[baseseqnum]["Acked"]!="":
                                             timerOn=False
                                             threadTimer = threading.Thread(target=start_timer)
@@ -433,6 +445,7 @@ def launchNode(self_port, peer_port, window_size, emulation_mode, emulation_valu
             bufferLength = bufferLength + 1
             buffer.append(packetWithHeader)
         
+        time.sleep(0.5)
         packetCount = bufferLength
         buffer[(bufferLength-1)]["fin"]= "yes"
         firstThread = threading.Thread(target=send_packets_in_window)

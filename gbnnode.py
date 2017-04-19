@@ -105,14 +105,14 @@ def launchNode(self_port, peer_port, window_size, emulation_mode, emulation_valu
                 #print buffer[nextseqnum]
                 
                 #To let ACK message received display first in printer
-                time.sleep(0.005)
+                #time.sleep(0.005)
                 #printnextsequence = buffer[nextseqnum]["sequence"]
                 #printnextdata = buffer[nextseqnum]["data"]
                 if nextseqnum < bufferLength:  
                     reserve_printer()
                     #print "base in send", baseseqnum
                     #print "next in send", nextseqnum
-                    print ("baseseqnum: %d, nextseqnum: %d, bufferLength: %d,window: %d" %(baseseqnum, nextseqnum, bufferLength, window_size))
+                    #print ("baseseqnum: %d, nextseqnum: %d, bufferLength: %d,window: %d" %(baseseqnum, nextseqnum, bufferLength, window_size))
                     print("[%s] packet%d %s sent" % (repr(time.time()), buffer[nextseqnum]["sequence"], buffer[nextseqnum]["data"]))
                     release_printer()
                     senderSideSocket.sendto(json.dumps(buffer[nextseqnum]), (self_ip, int(peer_port)))

@@ -107,7 +107,7 @@ def launchNode(self_port, peer_port, window_size, emulation_mode, emulation_valu
                     #print buffer[nextseqnum]
                     
                     #To let ACK message received display first in printer
-                    #time.sleep(0.005)
+                    time.sleep(0.005)
                     #printnextsequence = buffer[nextseqnum]["sequence"]
                     #printnextdata = buffer[nextseqnum]["data"]
                     #if nextseqnum < bufferLength:  
@@ -394,7 +394,7 @@ def launchNode(self_port, peer_port, window_size, emulation_mode, emulation_valu
                                     time.sleep(0.003)
                                     if baseseqnum < bufferLength:
                                         #Timer restart with new window's packets sent
-                                        if buffer[baseseqnum]["Acked"]!="":
+                                        if buffer[baseseqnum]["Acked"]=="":
                                             timerOn=False
                                             threadTimer = threading.Thread(target=start_timer)
                                             threadTimer.start()

@@ -107,7 +107,7 @@ def launchNode(self_port, peer_port, window_size, emulation_mode, emulation_valu
                     #print buffer[nextseqnum]
                     
                     #To let ACK message received display first in printer
-                    time.sleep(0.005)
+                    time.sleep(0.003)
                     #printnextsequence = buffer[nextseqnum]["sequence"]
                     #printnextdata = buffer[nextseqnum]["data"]
                     #if nextseqnum < bufferLength:  
@@ -327,7 +327,7 @@ def launchNode(self_port, peer_port, window_size, emulation_mode, emulation_valu
                                 if((int(message["sequence"])) > baseseqnum and baseseqnum!=0):
                                     timerOn = False
                                     AckGap = (int(message["sequence"]) - baseseqnum)
-                                    if baseseqnum != bufferLength:       
+                                    if baseseqnum < bufferLength:       
                                         #Acknowledge all packets before this current Cummulative ACK
                                         while (AckGap != 0):
                                             buffer[(baseseqnum-AckGap)]["Acked"]="yes"
@@ -341,14 +341,11 @@ def launchNode(self_port, peer_port, window_size, emulation_mode, emulation_valu
                                         #Now base is current
                                 
                                 if buffer[baseseqnum]["Acked"]=="no":
-                                    #print "in fin print summary"
                                     buffer[baseseqnum]["Acked"]="yes"
-                                    #timerOn=False
                                     baseseqnum = baseseqnum + 1
                                     AckCount=AckCount+1
-                                    if timerOn == True:
-                                        timerOn = False
-                                    
+                                    timerOn = False
+                                    time.sleep(0.003)
                                     reserve_printer()
                                     print("[%s] ACK%d received, window moves to %d" % (repr(time.time()), message["sequence"], baseseqnum))
                                     release_printer()
@@ -382,7 +379,7 @@ def launchNode(self_port, peer_port, window_size, emulation_mode, emulation_valu
                                 
                             elif (deterministicallyDropped==False or probabilisticallyDropped == False):
                                 #print "ACK received is %d, Next is: %d, base is: %d" %(message["sequence"],nextseqnum,baseseqnum)
-                                if((int(message["sequence"])) == baseseqnum): 
+                                if((int(message["sequence"])) == baseseqnum and buffer[baseseqnum]["Acked"]!="yes"): 
                                     buffer[baseseqnum]["Acked"]="yes"
                                     timerOn = False
                                     baseseqnum = baseseqnum + 1

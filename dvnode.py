@@ -86,7 +86,7 @@ def send_table_to_neighbors():
             senderSideSocket.sendto(json.dumps(SelfRoutingTable), (self_ip, int(i["TargetNode"])))
             release_printer()
 
-def receiver_processing():
+def routing_table_receiver_processing():
     global sendToNeighbors
     global firstTimeReceiving
     senderPort = None
@@ -181,7 +181,7 @@ self_ip = gethostname()
 senderSideSocket.bind((self_ip, self_port))  
     
     
-threadReceiver = threading.Thread(target=receiver_processing)
+threadReceiver = threading.Thread(target=routing_table_receiver_processing)
 threadReceiver.start()
 if isLastNode == True:
     send_table_to_neighbors()

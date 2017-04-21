@@ -122,29 +122,30 @@ Receiver: 2222 1111 5 -p 0.1
 send youalsohaveanotablelevelofinterestinyoualsohaveanotablelevelofinterestinyoualsohaveanotablelevelofinterestinyoualsohaveanotablelevelofinterestinyoualsohaveanotablelevelofinterestinyoualsohaveanotablelevelofinterestinyoualsohaveanotablelevelofinterestinyoualsohaveanotablelevelofinterestinyoualsohaveanotablelevelofinterestinyoualsohaveanotablelevelofinterestinyoualsohaveanotablelevelofinterestinyoualsohaveanotablelevelofinterestinyoualsohaveanotablelevelofinterestinyoualsohaveanotablelevelofinterestinyoualsohaveanotablelevelofinterestinyoualsohaveanotablelevelofinterestinyoualsohaveanotablelevelofinterestinyoualsohaveanotablelevelofinterestinyoualsohaveanotablelevelofinterestinyoualsohaveanotablelevelofinterestinyoualsohaveanotablelevelofinterestinyoualsohaveanotablelevelofinterestinyoualsohaveanotablelevelofinterestinyoualsohaveanotablelevelofinterestinyoualsohaveanotablelevelofinterestinyoualsohaveanotablelevelofinterestinyoualsohaveanotablelevelofinterestinyoualsohaveanotablelevelofinterestinyoualsohaveanotablelevelofinterestinyoualsohaveanotablelevelofinterestinyoualsohaveanotablelevelofinterestinyoualsohaveanotablelevelofinterestin
 
 Receiver log:
-[1491965710.853] packet1150 i received
-[1491965710.853] ACK1150 sent, expecting packet1151
-[1491965711.406] packet1148 s received
-[1491965711.407] packet1149 t received
-[1491965711.408] packet1150 i received
-[1491965711.408] packet1151 n received
-[1491965713.91] ACK1151 sent, expecting packet1152
-[Summary] 502/5106 packets dropped, loss rate = 9%
+[1492660153.361] packet1148 s received
+[1492660153.363] ACK1148 sent, expecting packet1149
+[1492660153.378] packet1149 t received
+[1492660153.378] ACK1149 sent, expecting packet1150
+[1492660153.409] packet1150 i received
+[1492660153.409] ACK1150 sent, expecting packet1151
+[1492660153.427] packet1149 t received
+[1492660153.428] ACK1149 sent, expecting packet1151
+[1492660153.433] packet1151 n received
+[1492660153.433] ACK1151 sent, expecting packet1152
+[Summary] 133/1522 packets dropped, loss rate = 0.09
 
 Sender log:
-[1491965711.419] ACK1149 received, window moves to 1150
-[1491965711.955] packet1148 timeout
-[1491965711.967] packet1149 timeout
-[1491965711.968] packet1149 t sent
-[1491965711.968] packet1150 i sent
-[1491965711.969] packet1151 n sent
-[1491965711.98] ACK1150 received, window moves to 1151
-[1491965712.513] packet1149 timeout
-[1491965712.528] packet1150 timeout
-[1491965712.529] packet1150 i sent
-[1491965712.529] packet1151 n sent
-[1491965715.042] ACK1151 received, window moves to 0
-[Summary] 126/1277 packets discarded, loss rate = 9%
+[1492660153.43] packet1149 t sent
+[1492660153.432] packet1151 n sent
+[1492660153.434] ACK1151 received, window moves to 1152
+[1492660153.436] packet1150 i sent
+[1492660153.438] packet1150 i sent
+[1492660153.439] packet1150 i sent
+[1492660153.441] ACK1151 received, window moves to 1152
+[1492660153.444] packet1151 n sent
+[1492660153.446] packet1151 n sent
+[1492660153.448] packet1151 n sent
+[Summary] 145/1297 packets discarded, loss rate = 0.11
 node> 
 
 

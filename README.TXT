@@ -30,6 +30,13 @@ B. dvnode.py: A graph based program utilizing Bellman-Ford distance vector algor
    discovered in the incoming routing table, it gets added to the receiving node's routing table. 2) Distances in the incoming routing table is then calculated against the receiving node's routing table. If the incoming distance is
    shorter, then the receiver routing table's distance and next hop information is updated.
 
+C. cnnode.py: This emulator combines the GBN and the DV protocols. The distance of each link will be the packet loss rate on that link calculated by the GBN protocol. The following setting is used for GBN:
+* Window size is always 5
+* Data packet will only be dropped probabilistically
+* ACK will never be dropped
+* Timeout is 500ms
+
+
 ALGORITHM AND DATA STRUCTURES EXPLANATION
 GBNNODE.PY: 
 * The packet in gbnnode.py is implemented using a list of dictionaries.
@@ -50,7 +57,9 @@ The routing table in DVNODE is a list that contains dictionaries. Each dictionar
 computation of the Bellman-Ford algorithm. Sending and receiving uses UDP, and is transmitted as json objects. The Bellman-Ford algorithm first initializes the graph by having the nodes send routing information to their neighbors,
 and afterwards iterating through a distance minimization calculation, and updating their local tables accordingly.
 
-ADDITIONAL FEATURES/FUNCTIONS
+CNNODE.PY:
+The emulator utilizes probe packets to determine the link cost via GBN. At first, every link cost between nodes is set to zero. As probe packets are sent, the link weight provided in the command line argument starts to emerge and converge.
+This is then stored in the routing table of each nodes as link costs.
 
 REFERENCES
 https://docs.python.org/2/howto/sockets.html

@@ -11,10 +11,10 @@ import random
 
 # A list of global variables to be used throughout the GBN program
 argList = []  # Argument parser
-timerOn = False  # Buffer for ack processing, initialized as 0 to signify unused
-readyToPrint = True
+timerOn = False  # Initialize Timer as False
+readyToPrint = True #Printer reserver, set as ready To Print
 
-# Initialize the base sequence number, next seq number, and the buffer
+# Initialize the base sequence number, next seq number, the buffer, and the counters
 baseseqnum = 0
 nextseqnum = 0
 expectedseqnum = 0
@@ -35,6 +35,7 @@ def parse_keyboard_input(s):
         pkts = list(a[1])
         return pkts
 
+# function to reserve printer to screen
 def reserve_printer():
     global readyToPrint
     
@@ -43,6 +44,7 @@ def reserve_printer():
         
     readyToPrint = False
     
+# function to release printer reservation
 def release_printer():
     global readyToPrint
     readyToPrint = True
@@ -62,6 +64,7 @@ def launchNode(self_port, peer_port, window_size, emulation_mode, emulation_valu
     self_ip = gethostname()
     senderSideSocket.bind((self_ip, self_port))          
     
+    #Send all packets in the window
     def send_all_packets_in_window():
         global baseseqnum
         global nextseqnum
@@ -88,6 +91,7 @@ def launchNode(self_port, peer_port, window_size, emulation_mode, emulation_valu
                 packetCount=packetCount+1
                 basebuffer = basebuffer+1  
     
+    # Send packets depending if ACKs has been received and whether they are in window
     def send_packets_in_window():
         global baseseqnum
         global nextseqnum
@@ -132,7 +136,7 @@ def launchNode(self_port, peer_port, window_size, emulation_mode, emulation_valu
                     
                     #print ("nextseqnum is equal to bufferlength")
                 #    timerOn = False
-
+    
     def process_timeout():
         global baseseqnum
         global bufferLength
@@ -147,7 +151,6 @@ def launchNode(self_port, peer_port, window_size, emulation_mode, emulation_valu
             send_all_packets_in_window()          
     
     def start_timer():
-        # Give the message a bit of time to reach the target
         global timerOn
         timerOn = True
         t_start = time.time()

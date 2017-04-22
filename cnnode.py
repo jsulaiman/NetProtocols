@@ -10,11 +10,12 @@ import random
 
 # A list of global variables to be used throughout the GBN program
 argList = []  # Argument parser
-timerOn = False  # Buffer for ack processing, initialized as 0 to signify unused
-readyToPrint = True
+timerOn = False  # Initialize Timer as False
+readyToPrint = True #Printer reserver, set as ready To Print
 windowSize=5
 emulationMode="-p"
-# Initialize the base sequence number, next seq number, and the buffer
+
+# Initialize the base sequence number, next seq number, the buffer, and the counters
 baseseqnum = 0
 nextseqnum = 0
 expectedseqnum = 0
@@ -91,7 +92,7 @@ if len(neighborNodes) > 16:
     sys.exit()
 
 
-def launchNode(self_port, peer_port, window_size, emulation_mode, emulation_value):
+def launchNode(self_port, peer_port, window_size, emulation_mode, emulation_value,node_type):
     
     # Create a UDP datagram socket for the client
     #senderSideSocket = socket(AF_INET, SOCK_DGRAM)
@@ -205,287 +206,14 @@ def launchNode(self_port, peer_port, window_size, emulation_mode, emulation_valu
             timerOn = False
             process_timeout()
     
-    # Listen for incoming messages and process them            
-    def probe_receiver_processing():
-        senderPort = None
-        detPacketCounter = 0
-        global timerOn
-        global baseseqnum
-        global nextseqnum
-        global expectedseqnum
-        global bufferLength
-        global lostPacketCounter
-        global packetCount
-        global AckCount
-        global buffer
-        
-        # Global references to allow for buffer reset
-        global stopSending
-        global bufferLength
-        
-        detPacketCounter=0
-        
-        while True:
-            incomingPacket = None
-            try:
-                incomingPacket, (senderIp, senderPort) = senderSideSocket.recvfrom(1024)
-            except:
-                time.sleep(0.001)
-                #print ("waiting")
-            
-            # Ignores packets sent from self
-            if senderPort == self_port:
-                1;
-                
-            elif incomingPacket:
-                # try:
-                    message = json.loads(incomingPacket)
-                    #print ("in get_message, capturing incoming msg", message)
-                    # Check if it is a packet containing acknowledgment of a previously sent packet    
-                    
-                    probabilisticallyDropped = False
-                    deterministicallyDropped = False
-                    deterministicValue = 9999999999999999999 #Ensure that modulo of this number is always going to be a non zero
-                        
-                    # RECEIVER SECTION
-                    # Process incoming packet as Receiver
-                    if (message["data"] != None):
-                        detPacketCounter=detPacketCounter+1
-                        
-                        if emulation_mode == "-p":
-                            emulProb=float(emulation_value)
-                            if emulProb > 0:
-                                random_number = float(random.random())
-                                if random_number < emulProb:
-                                    probabilisticallyDropped = True
-                            
-                        elif emulation_mode == "-d":
-                            deterministicValue = emulation_value
-                            if((int(detPacketCounter) % int(deterministicValue)) == 0):
-                                deterministicallyDropped = True
-                                
-                        if((deterministicallyDropped==True or probabilisticallyDropped==True) and message["fin"]!="printSummary"):
-                            if(expectedseqnum==message["sequence"]): 
-                                reserve_printer()
-                                #print ("modulo: %d, prob drop: %s" %((int(message["sequence"] + 1) % int(deterministicValue)),probabilisticallyDropped))
-                                print("[%s] packet%d %s discarded" % (repr(time.time()), message["sequence"], message["data"]))
-                                release_printer()
-                                lostPacketCounter=lostPacketCounter+1
-                                packetCount=packetCount+1    
-                        else:
-                            if(expectedseqnum==message["sequence"]): 
-                                #print ("Counter: %d. Modulo: %d " %(detPacketCounter,(int(detPacketCounter) % int(deterministicValue))))
-                                    if message["fin"]== "yes":
-                                        lastpacketnum=message["data"]
-                                        message["data"] = None
-                                        message["fin"]="printSummary"
-                                        expectedseqnum=message["sequence"] + 1
-                                        packetCount=packetCount+1
-                                        senderSideSocket.sendto(json.dumps(message), (self_ip, int(peer_port)))
-                                        # Turn off timer
-                                        if timerOn == True:
-                                            timerOn = False
-
-                                        
-                                        reserve_printer()
-                                        print("[%s] packet%d %s received" % (repr(time.time()), message["sequence"], lastpacketnum))
-                                        print("[%s] ACK%d sent, expecting packet%s" % (repr(time.time()), message["sequence"], expectedseqnum))
-                                        release_printer()
-                                        
-                                        time.sleep(1)
-                                        reserve_printer()
-                                        print ("[Summary] %d/%d packets dropped, loss rate = %s" %(lostPacketCounter,packetCount,format(float(lostPacketCounter)/packetCount,".2f")))
-                                        release_printer()
-                                        
-                                        baseseqnum = 0
-                                        nextseqnum = 0
-                                        expectedseqnum = 0
-                                        bufferLength = 0
-                                        stopSending = False
-                                        lostPacketCounter = 0
-                                        packetCount = 0
-                                        AckCount = 0
-                                        buffer = []
-                                        timerOn = False
-                                        process_send()
-
-                       
-                                    #Send ACK
-                                    else:
-                                        reserve_printer()
-                                        #print ("detvalue: %d, modulo: %d, prob drop: %s" %(int(deterministicValue),(int(message["sequence"] + 1) % int(deterministicValue)),probabilisticallyDropped))
-                                        print("[%s] packet%d %s received" % (repr(time.time()), message["sequence"], message["data"]))
-                                        release_printer()
-                                        packetCount=packetCount+1
-                            
-                                        receivedSequence = message["sequence"]
-                                        expectedseqnum = message["sequence"] + 1
-                                        message["data"] = None
-                                        senderSideSocket.sendto(json.dumps(message), (self_ip, int(peer_port)))
-                                        reserve_printer()
-                                        print("[%s] ACK%d sent, expecting packet%s" % (repr(time.time()), receivedSequence, expectedseqnum))
-                                        release_printer()
-                            #Ignore out of expectation packets
-                            elif (message["sequence"]>expectedseqnum): 
-                                1;
-                            else:
-                                reserve_printer()
-                                #print ("detvalue: %d, modulo: %d, prob drop: %s" %(int(deterministicValue),(int(message["sequence"] + 1) % int(deterministicValue)),probabilisticallyDropped))
-                                print("[%s] packet%d %s received" % (repr(time.time()), message["sequence"], message["data"]))
-                                release_printer()
-                                packetCount=packetCount+1
-                    
-                                receivedSequence = message["sequence"]
-                                message["data"] = None
-                                senderSideSocket.sendto(json.dumps(message), (self_ip, int(peer_port)))
-                                reserve_printer()
-                                print("[%s] ACK%d sent, expecting packet%s" % (repr(time.time()), receivedSequence, expectedseqnum))
-                                release_printer()
-                    
-                    # SENDER SECTION
-                    # Process incoming Ack as Sender
-                    else:
-                        detPacketCounter=detPacketCounter+1
-                        # Process ACK, move window as appropriate
-                        if emulation_mode == "-p":
-                            emulProb=float(emulation_value)
-                            if emulProb > 0:
-                                random_number = float(random.random())
-                                if random_number < emulProb:
-                                    probabilisticallyDropped = True
-                                
-                        if emulation_mode == "-d":
-                            deterministicValue = emulation_value
-                            if((int(detPacketCounter) % int(deterministicValue)) == 0):
-                                deterministicallyDropped = True
-                                
-                        if (emulation_mode == "-d" or emulation_mode == "-p"):                        
-                            if message["fin"]== "printSummary":
-                                # Process cummulative ACKs
-                                if((int(message["sequence"])) > baseseqnum and baseseqnum!=0):
-                                    timerOn = False
-                                    AckGap = (int(message["sequence"]) - baseseqnum)
-                                    if baseseqnum < bufferLength:       
-                                        #Acknowledge all packets before this current Cummulative ACK
-                                        while (AckGap != 0):
-                                            if buffer[baseseqnum]["Acked"]=="no":
-                                                buffer[(baseseqnum-AckGap)]["Acked"]="yes"
-                                                #timerOn=False
-                                                AckGap = AckGap - 1
-                                                baseseqnum = baseseqnum + 1
-                                                reserve_printer()
-                                                print("[%s] ACK%d received, window moves to %d" % (repr(time.time()), (baseseqnum-AckGap), (baseseqnum-AckGap+1)))
-                                                release_printer()
-                                                AckCount=AckCount+1
-                                        #Now base is current
-                                
-                                if buffer[baseseqnum]["Acked"]=="no":
-                                    buffer[baseseqnum]["Acked"]="yes"
-                                    baseseqnum = baseseqnum + 1
-                                    AckCount=AckCount+1
-                                    timerOn = False
-                                    time.sleep(0.006)
-                                    reserve_printer()
-                                    print("[%s] ACK%d received, window moves to %d" % (repr(time.time()), message["sequence"], baseseqnum))
-                                    release_printer()
-                                    # Turn off timer, let remaining incoming ACKs printed first
-                                
-                                time.sleep(1)
-                                reserve_printer()
-                                print ("[Summary] %d/%d packets discarded, loss rate = %s" %(lostPacketCounter,AckCount,format(float(lostPacketCounter)/AckCount,".2f")))
-                                release_printer()
-                                
-                                baseseqnum = 0
-                                nextseqnum = 0
-                                expectedseqnum = 0
-                                bufferLength = 0
-                                stopSending = False
-                                lostPacketCounter = 0
-                                packetCount = 0
-                                AckCount = 0
-                                buffer = []
-                                timerOn = False
-                                process_send()
-                                    
-                            # Emulate packet loss
-                            elif ((int(message["sequence"]) != 0) and (deterministicallyDropped==True or probabilisticallyDropped==True)):
-                                reserve_printer()
-                                print("[%s] ACK%d discarded" % (repr(time.time()), message["sequence"]))
-                                release_printer()
-                                lostPacketCounter=lostPacketCounter+1
-                                packetCount=packetCount+1
-                                AckCount=AckCount+1
-                                
-                            elif (deterministicallyDropped==False or probabilisticallyDropped == False):
-                                #print "ACK received is %d, Next is: %d, base is: %d" %(message["sequence"],nextseqnum,baseseqnum)
-                                if((int(message["sequence"])) == baseseqnum and buffer[baseseqnum]["Acked"]!="yes"): 
-                                    buffer[baseseqnum]["Acked"]="yes"
-                                    timerOn = False
-                                    baseseqnum = baseseqnum + 1
-                                    reserve_printer()
-                                    print("[%s] ACK%d received, window moves to %d" % (repr(time.time()), message["sequence"], baseseqnum))
-                                    release_printer()
-                                    
-                                    #Allow print messages
-                                    time.sleep(0.006)
-                                    if baseseqnum < bufferLength:
-                                        #Timer restart with new window's packets sent
-                                        if buffer[baseseqnum]["Acked"]=="":
-                                            timerOn=False
-                                            threadTimer = threading.Thread(target=start_timer)
-                                            threadTimer.start()
-                                            send_packets_in_window()
-                                        # If first packet is already on it's way but not ACKed, restart timer
-                                        elif buffer[baseseqnum]["Acked"]=="no":
-                                            timerOn=False
-                                            threadTimer = threading.Thread(target=start_timer)
-                                            threadTimer.start()
-                                    
-                                    #time.sleep(0.01)
-                                    #packetCount=packetCount+1
-                                    AckCount=AckCount+1
-                                # Process cummulative ACKs
-                                elif((int(message["sequence"])) > baseseqnum and baseseqnum!=0):
-                                    timerOn = False
-                                    AckGap = (int(message["sequence"]) - baseseqnum)
-                                    
-                                    if baseseqnum < bufferLength:       
-                                        #Acknowledge all packets before this current Cummulative ACK
-                                        while (AckGap != 0):
-                                            buffer[(baseseqnum-AckGap)]["Acked"]="yes"
-                                            #timerOn=False
-                                            AckGap = AckGap - 1
-                                            baseseqnum = baseseqnum + 1
-                                            reserve_printer()
-                                            print("[%s] ACK%d received, window moves to %d" % (repr(time.time()), (baseseqnum-AckGap), (baseseqnum-AckGap+1)))
-                                            release_printer()
-                                            AckCount=AckCount+1
-                                        #Now base is current
-                                        if buffer[baseseqnum]["Acked"]!="":
-                                            timerOn=False
-                                            threadTimer = threading.Thread(target=start_timer)
-                                            threadTimer.start()
-                                            send_packets_in_window()
-                                        elif buffer[baseseqnum]["Acked"]=="no":
-                                            timerOn=False
-                                            threadTimer = threading.Thread(target=start_timer)
-                                            threadTimer.start()
-
-
-                        else:
-                            print ("else in Ack")
-                            #print "ACK received is %d, Expected is: %d" %(message["sequence"],expectedseqnum)
-                # except:
-                #    print ("[Exception: Cannot deliver an incoming chat transmission]")
-        
     def process_send():
         global timerOn
         global bufferLength
         global lostPacketCounter
         global packetCount
         #thread.start_new_thread(routing_table_receiver_processing, ())
-        threadReceiver = threading.Thread(target=probe_receiver_processing)
-        threadReceiver.start()
+        #threadReceiver = threading.Thread(target=probe_receiver_processing)
+        #threadReceiver.start()
         #print("node>"),
         # Listen to keyboard input and process        
         #keyboardInput = raw_input().strip()
@@ -517,8 +245,9 @@ def launchNode(self_port, peer_port, window_size, emulation_mode, emulation_valu
         #    time.sleep(0.01)
             
         #firstThread.join()
-
-    process_send()              
+        
+    if node_type=="prober":
+        process_send()            
     
 ###############################################################
 # Command Line Processing
@@ -571,17 +300,16 @@ def print_table():
             print " - (%s) -> Node %d" %(format(i["Distance"],".1f"),i["TargetNode"])
         else:
             print " - (%s) -> Node %d; Next hop -> Node %d" %(format(i["Distance"],".1f"),i["TargetNode"],i["NextHop"])
-            
+                        
 def send_probe_packets():
-    #send probes for each peer
-    peerPort = 0
+    nodeType="prober"
     emulationValue = 0
     global clearToSend
     #capture loss rate
     for i in senderNodeList:
         clearToSend=False
         peerPort = i
-        launchNode(self_port, peerPort, windowSize, emulationMode, emulationValue)
+        launchNode(self_port, peerPort, windowSize, emulationMode, emulationValue, nodeType)
         while clearToSend==False:
             time.sleep(0.05)
     #update cost
@@ -595,7 +323,287 @@ def send_table_to_neighbors():
             senderSideSocket.sendto(json.dumps(SelfRoutingTable), (self_ip, int(i["TargetNode"])))
             release_printer()
 
+# Listen for incoming messages and process them            
+def probe_receiver_processing(probe_message):
+    senderPort = None
+    emulation_mode = "-p"
+    emulation_value = 1
+    detPacketCounter = 0
+    global timerOn
+    global baseseqnum
+    global nextseqnum
+    global expectedseqnum
+    global bufferLength
+    global lostPacketCounter
+    global packetCount
+    global AckCount
+    global buffer
+    
+    # Global references to allow for buffer reset
+    global stopSending
+    global bufferLength
+    
+    detPacketCounter=0
+    
+    message = probe_message
+    #print ("in get_message, capturing incoming msg", message)
+    # Check if it is a packet containing acknowledgment of a previously sent packet    
+    
+    probabilisticallyDropped = False
+    deterministicallyDropped = False
+    deterministicValue = 9999999999999999999 #Ensure that modulo of this number is always going to be a non zero
+        
+    # RECEIVER SECTION
+    # Process incoming packet as Receiver
+    if (message["data"] != None):
+        detPacketCounter=detPacketCounter+1
+        
+        if emulation_mode == "-p":
+            emulProb=float(emulation_value)
+            if emulProb > 0:
+                random_number = float(random.random())
+                if random_number < emulProb:
+                    probabilisticallyDropped = True
+            
+        elif emulation_mode == "-d":
+            deterministicValue = emulation_value
+            if((int(detPacketCounter) % int(deterministicValue)) == 0):
+                deterministicallyDropped = True
+        
+        if((deterministicallyDropped==True or probabilisticallyDropped==True) and message["fin"]!="printSummary"):
+            if(expectedseqnum==message["sequence"]): 
+                reserve_printer()
+                #print ("modulo: %d, prob drop: %s" %((int(message["sequence"] + 1) % int(deterministicValue)),probabilisticallyDropped))
+                print("[%s] packet%d %s discarded" % (repr(time.time()), message["sequence"], message["data"]))
+                release_printer()
+                lostPacketCounter=lostPacketCounter+1
+                packetCount=packetCount+1    
+        else:
+            if(expectedseqnum==message["sequence"]): 
+                #print ("Counter: %d. Modulo: %d " %(detPacketCounter,(int(detPacketCounter) % int(deterministicValue))))
+                    if message["fin"]== "yes":
+                        lastpacketnum=message["data"]
+                        message["data"] = None
+                        message["fin"]="printSummary"
+                        expectedseqnum=message["sequence"] + 1
+                        packetCount=packetCount+1
+                        senderSideSocket.sendto(json.dumps(message), (self_ip, int(peer_port)))
+                        # Turn off timer
+                        if timerOn == True:
+                            timerOn = False
+
+                        
+                        reserve_printer()
+                        print("[%s] packet%d %s received" % (repr(time.time()), message["sequence"], lastpacketnum))
+                        print("[%s] ACK%d sent, expecting packet%s" % (repr(time.time()), message["sequence"], expectedseqnum))
+                        release_printer()
+                        
+                        time.sleep(1)
+                        reserve_printer()
+                        print ("[Summary] %d/%d packets dropped, loss rate = %s" %(lostPacketCounter,packetCount,format(float(lostPacketCounter)/packetCount,".2f")))
+                        release_printer()
+                        
+                        baseseqnum = 0
+                        nextseqnum = 0
+                        expectedseqnum = 0
+                        bufferLength = 0
+                        stopSending = False
+                        lostPacketCounter = 0
+                        packetCount = 0
+                        AckCount = 0
+                        buffer = []
+                        timerOn = False
+                        process_send()
+
+       
+                    #Send ACK
+                    else:
+                        reserve_printer()
+                        #print ("detvalue: %d, modulo: %d, prob drop: %s" %(int(deterministicValue),(int(message["sequence"] + 1) % int(deterministicValue)),probabilisticallyDropped))
+                        print("[%s] packet%d %s received" % (repr(time.time()), message["sequence"], message["data"]))
+                        release_printer()
+                        packetCount=packetCount+1
+            
+                        receivedSequence = message["sequence"]
+                        expectedseqnum = message["sequence"] + 1
+                        message["data"] = None
+                        senderSideSocket.sendto(json.dumps(message), (self_ip, int(peer_port)))
+                        reserve_printer()
+                        print("[%s] ACK%d sent, expecting packet%s" % (repr(time.time()), receivedSequence, expectedseqnum))
+                        release_printer()
+            #Ignore out of expectation packets
+            elif (message["sequence"]>expectedseqnum): 
+                1;
+            else:
+                reserve_printer()
+                #print ("detvalue: %d, modulo: %d, prob drop: %s" %(int(deterministicValue),(int(message["sequence"] + 1) % int(deterministicValue)),probabilisticallyDropped))
+                print("[%s] packet%d %s received" % (repr(time.time()), message["sequence"], message["data"]))
+                release_printer()
+                packetCount=packetCount+1
+    
+                receivedSequence = message["sequence"]
+                message["data"] = None
+                senderSideSocket.sendto(json.dumps(message), (self_ip, int(peer_port)))
+                reserve_printer()
+                print("[%s] ACK%d sent, expecting packet%s" % (repr(time.time()), receivedSequence, expectedseqnum))
+                release_printer()
+    
+    # SENDER SECTION
+    # Process incoming Ack as Sender
+    else:
+        detPacketCounter=detPacketCounter+1
+        # Process ACK, move window as appropriate
+        if emulation_mode == "-p":
+            emulProb=float(emulation_value)
+            if emulProb > 0:
+                random_number = float(random.random())
+                if random_number < emulProb:
+                    sendProbabilisticallyDropped = True
+                
+        if emulation_mode == "-d":
+            deterministicValue = emulation_value
+            if((int(detPacketCounter) % int(deterministicValue)) == 0):
+                deterministicallyDropped = True
+        
+        #Never drop ACKs
+        sendProbabilisticallyDropped = False
+        if (emulation_mode == "-d" or emulation_mode == "-p"):                        
+            if message["fin"]== "printSummary":
+                # Process cummulative ACKs
+                if((int(message["sequence"])) > baseseqnum and baseseqnum!=0):
+                    timerOn = False
+                    AckGap = (int(message["sequence"]) - baseseqnum)
+                    if baseseqnum < bufferLength:       
+                        #Acknowledge all packets before this current Cummulative ACK
+                        while (AckGap != 0):
+                            if buffer[baseseqnum]["Acked"]=="no":
+                                buffer[(baseseqnum-AckGap)]["Acked"]="yes"
+                                #timerOn=False
+                                AckGap = AckGap - 1
+                                baseseqnum = baseseqnum + 1
+                                reserve_printer()
+                                print("[%s] ACK%d received, window moves to %d" % (repr(time.time()), (baseseqnum-AckGap), (baseseqnum-AckGap+1)))
+                                release_printer()
+                                AckCount=AckCount+1
+                        #Now base is current
+                
+                if buffer[baseseqnum]["Acked"]=="no":
+                    buffer[baseseqnum]["Acked"]="yes"
+                    baseseqnum = baseseqnum + 1
+                    AckCount=AckCount+1
+                    timerOn = False
+                    time.sleep(0.006)
+                    reserve_printer()
+                    print("[%s] ACK%d received, window moves to %d" % (repr(time.time()), message["sequence"], baseseqnum))
+                    release_printer()
+                    # Turn off timer, let remaining incoming ACKs printed first
+                
+                time.sleep(1)
+                reserve_printer()
+                print ("[Summary] %d/%d packets discarded, loss rate = %s" %(lostPacketCounter,AckCount,format(float(lostPacketCounter)/AckCount,".2f")))
+                release_printer()
+                
+                baseseqnum = 0
+                nextseqnum = 0
+                expectedseqnum = 0
+                bufferLength = 0
+                stopSending = False
+                lostPacketCounter = 0
+                packetCount = 0
+                AckCount = 0
+                buffer = []
+                timerOn = False
+                process_send()
+                    
+            # Emulate packet loss
+            elif ((int(message["sequence"]) != 0) and (deterministicallyDropped==True or probabilisticallyDropped==True)):
+                reserve_printer()
+                print("[%s] ACK%d discarded" % (repr(time.time()), message["sequence"]))
+                release_printer()
+                lostPacketCounter=lostPacketCounter+1
+                packetCount=packetCount+1
+                AckCount=AckCount+1
+                
+            elif (deterministicallyDropped==False or probabilisticallyDropped == False):
+                #print "ACK received is %d, Next is: %d, base is: %d" %(message["sequence"],nextseqnum,baseseqnum)
+                if((int(message["sequence"])) == baseseqnum and buffer[baseseqnum]["Acked"]!="yes"): 
+                    buffer[baseseqnum]["Acked"]="yes"
+                    timerOn = False
+                    baseseqnum = baseseqnum + 1
+                    reserve_printer()
+                    print("[%s] ACK%d received, window moves to %d" % (repr(time.time()), message["sequence"], baseseqnum))
+                    release_printer()
+                    
+                    #Allow print messages
+                    time.sleep(0.006)
+                    if baseseqnum < bufferLength:
+                        #Timer restart with new window's packets sent
+                        if buffer[baseseqnum]["Acked"]=="":
+                            timerOn=False
+                            threadTimer = threading.Thread(target=start_timer)
+                            threadTimer.start()
+                            send_packets_in_window()
+                        # If first packet is already on it's way but not ACKed, restart timer
+                        elif buffer[baseseqnum]["Acked"]=="no":
+                            timerOn=False
+                            threadTimer = threading.Thread(target=start_timer)
+                            threadTimer.start()
+                    
+                    #time.sleep(0.01)
+                    #packetCount=packetCount+1
+                    AckCount=AckCount+1
+                # Process cummulative ACKs
+                elif((int(message["sequence"])) > baseseqnum and baseseqnum!=0):
+                    timerOn = False
+                    AckGap = (int(message["sequence"]) - baseseqnum)
+                    
+                    if baseseqnum < bufferLength:       
+                        #Acknowledge all packets before this current Cummulative ACK
+                        while (AckGap != 0):
+                            buffer[(baseseqnum-AckGap)]["Acked"]="yes"
+                            #timerOn=False
+                            AckGap = AckGap - 1
+                            baseseqnum = baseseqnum + 1
+                            reserve_printer()
+                            print("[%s] ACK%d received, window moves to %d" % (repr(time.time()), (baseseqnum-AckGap), (baseseqnum-AckGap+1)))
+                            release_printer()
+                            AckCount=AckCount+1
+                        #Now base is current
+                        if buffer[baseseqnum]["Acked"]!="":
+                            timerOn=False
+                            threadTimer = threading.Thread(target=start_timer)
+                            threadTimer.start()
+                            send_packets_in_window()
+                        elif buffer[baseseqnum]["Acked"]=="no":
+                            timerOn=False
+                            threadTimer = threading.Thread(target=start_timer)
+                            threadTimer.start()
+
+
+        else:
+            print ("else in Ack")
+
+
 def routing_table_receiver_processing():
+    #GBN Variables
+    senderPort = None
+    detPacketCounter = 0
+    global timerOn
+    global baseseqnum
+    global nextseqnum
+    global expectedseqnum
+    global bufferLength
+    global lostPacketCounter
+    global packetCount
+    global AckCount
+    global buffer
+    
+    # Global references to allow for buffer reset
+    global stopSending
+    global bufferLength
+    
+    detPacketCounter=0
+        
     global sendToNeighbors
     global firstTimeReceiving
     senderPort = None
@@ -617,76 +625,79 @@ def routing_table_receiver_processing():
         elif incomingPacket:
             message = json.loads(incomingPacket)
             #message = incomingPacket
-            print("[%s] Message received at Node %d from Node %d" %(repr(time.time()), self_port,senderPort))
             
-            #Add any new node to SelfRoutingTable
-            
-            #Mark a node as existing
-            for i in message:
-                i["nodeExists"]=False
-                for j in SelfRoutingTable:
-                    if i["TargetNode"]==j["TargetNode"]:
-                        i["nodeExists"]=True
-                    if j["TargetNode"]==i["SourceNode"]and i["TargetNode"]!=i["SourceNode"]:
-                        thisNeighborDistance=j["Distance"]
-                        for k in neighborList:
-                            if i["TargetNode"]==j["SourceNode"]:
-                                if i["NextHop"]!=None and i["NextHop"]==k:
-                                    NextHopIsNeighbor=True
-                                    NextHopNeighbor=i["NextHop"]
-                                    #print "NextHop: ", NextHopNeighbor
-            #print message
-            
-            for i in message:
-                if int(i["TargetNode"])==self_port:
-                    1;
-                # Add new node to SelfRoutingTable, set distance to maximum
-                elif i["nodeExists"]==False:
-                    
-                    routingTableStructure = {"TargetNode": 0,"SourceNode":0,"Distance":9, "NextHop": None, "isTargetAndSourceNeighbors": False, "nodeExists": None, "DistToNextHop": 0}
-                    
-                    routingTableStructure["SourceNode"] = self_port
-                    routingTableStructure["TargetNode"] = int(i["TargetNode"])
-                    routingTableStructure["NextHop"] = int(i["SourceNode"]) 
-                    routingTableStructure["nodeExists"] = True
-                    routingTableStructure["DistToNextHop"]=thisNeighborDistance
-                    SelfRoutingTable.append(routingTableStructure)
-            
-                    print_table()
-                    
-                # Start Bellman-Ford algorithm
-                elif i["nodeExists"]==True:
-                    #===========================================================
-                    # for j in SelfRoutingTable:
-                    #     if i["SourceNode"]==j["TargetNode"] and i["TargetNode"]==j["SourceNode"]:
-                    #     currentNeighborDistance = j["Distance"]
-                    #===========================================================
+            if type(message) is list:
+                print("[%s] Message received at Node %d from Node %d" %(repr(time.time()), self_port,senderPort))
+                
+                #Add any new node to SelfRoutingTable
+                
+                #Mark a node as existing
+                for i in message:
+                    i["nodeExists"]=False
                     for j in SelfRoutingTable:
                         if i["TargetNode"]==j["TargetNode"]:
-                            if (i["Distance"]+thisNeighborDistance)<j["Distance"]:
-                                #print ("routing source:%d ,old distance: %f, new distance to %d: %f , neighbor's distance to %d: %f, neighbor's next hop:%s" 
-                                #       %(i["SourceNode"],j["Distance"],j["TargetNode"],i["Distance"]+thisNeighborDistance,j["SourceNode"],thisNeighborDistance,str(i["NextHop"])))
-                                j["Distance"]=i["Distance"]+thisNeighborDistance
-                                
-                                
-                                if NextHopIsNeighbor==True:
-                                    j["NextHop"]=NextHopNeighbor
-                                
-                                else:
-                                    j["NextHop"]=i["SourceNode"]
-                                print_table()
-                                send_table_to_neighbors()
+                            i["nodeExists"]=True
+                        if j["TargetNode"]==i["SourceNode"]and i["TargetNode"]!=i["SourceNode"]:
+                            thisNeighborDistance=j["Distance"]
+                            for k in neighborList:
+                                if i["TargetNode"]==j["SourceNode"]:
+                                    if i["NextHop"]!=None and i["NextHop"]==k:
+                                        NextHopIsNeighbor=True
+                                        NextHopNeighbor=i["NextHop"]
+                                        #print "NextHop: ", NextHopNeighbor
+                #print message
+                for i in message:
+                    if int(i["TargetNode"])==self_port:
+                        1;
+                    # Add new node to SelfRoutingTable, set distance to maximum
+                    elif i["nodeExists"]==False:
                         
-            if firstTimeReceiving==True:
-                #print firstTimeReceiving
-                firstTimeReceiving=False
+                        routingTableStructure = {"TargetNode": 0,"SourceNode":0,"Distance":9, "NextHop": None, "isTargetAndSourceNeighbors": False, "nodeExists": None, "DistToNextHop": 0}
+                        
+                        routingTableStructure["SourceNode"] = self_port
+                        routingTableStructure["TargetNode"] = int(i["TargetNode"])
+                        routingTableStructure["NextHop"] = int(i["SourceNode"]) 
+                        routingTableStructure["nodeExists"] = True
+                        routingTableStructure["DistToNextHop"]=thisNeighborDistance
+                        SelfRoutingTable.append(routingTableStructure)
                 
-                #send table
-                send_table_to_neighbors()
-                
-                #send probes
-                send_probe_packets()
-            #print SelfRoutingTable
+                        print_table()
+                        
+                    # Start Bellman-Ford algorithm
+                    elif i["nodeExists"]==True:
+                        #===========================================================
+                        # for j in SelfRoutingTable:
+                        #     if i["SourceNode"]==j["TargetNode"] and i["TargetNode"]==j["SourceNode"]:
+                        #     currentNeighborDistance = j["Distance"]
+                        #===========================================================
+                        for j in SelfRoutingTable:
+                            if i["TargetNode"]==j["TargetNode"]:
+                                if (i["Distance"]+thisNeighborDistance)<j["Distance"]:
+                                    #print ("routing source:%d ,old distance: %f, new distance to %d: %f , neighbor's distance to %d: %f, neighbor's next hop:%s" 
+                                    #       %(i["SourceNode"],j["Distance"],j["TargetNode"],i["Distance"]+thisNeighborDistance,j["SourceNode"],thisNeighborDistance,str(i["NextHop"])))
+                                    j["Distance"]=i["Distance"]+thisNeighborDistance
+                                    
+                                    
+                                    if NextHopIsNeighbor==True:
+                                        j["NextHop"]=NextHopNeighbor
+                                    
+                                    else:
+                                        j["NextHop"]=i["SourceNode"]
+                                    print_table()
+                                    send_table_to_neighbors()
+                        
+                if firstTimeReceiving==True:
+                    #print firstTimeReceiving
+                    firstTimeReceiving=False
+                    
+                    #send table
+                    send_table_to_neighbors()
+                    
+                    #send probes after the network becomes ready
+                    send_probe_packets()
+                #print SelfRoutingTable
+            else:
+                probe_receiver_processing(message)
     
 initialize_self_table()
 print_table()

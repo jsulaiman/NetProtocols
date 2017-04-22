@@ -13,6 +13,7 @@ argList = []  # Argument parser
 timerOn = False  # Initialize Timer as False
 readyToPrint = True #Printer reserver, set as ready To Print
 windowSize=5
+window_size=5
 emulationMode="-p"
 
 # Initialize the base sequence number, next seq number, the buffer, and the counters
@@ -91,15 +92,30 @@ if len(neighborNodes) > 16:
     print ("Too many nodes (maximum 16")
     sys.exit()
 
+def start_timer():
+    # Give the message a bit of time to reach the target
+    global timerOn
+    timerOn = True
+    t_start = time.time()
+    t_end = time.time() + 0.5
 
-def launchNode(self_port, peer_port, window_size, emulation_mode, emulation_value,node_type):
+    while (t_start < t_end and timerOn == True):
+            #reserve_printer()
+            
+            #print "packet%d is in timer: [%s], stop at [%s]" % (pktNum, t_start,t_end)
+            #release_printer()
+            t_start = t_start + .005
+            time.sleep(0.005)
+            #if(timerOn == False):
+                # Reset buffer
+            #    return True;
     
-    # Create a UDP datagram socket for the client
-    #senderSideSocket = socket(AF_INET, SOCK_DGRAM)
-    #self_ip = gethostname()
-    #senderSideSocket.bind((self_ip, self_port))          
-    
-    def send_all_packets_in_window():
+    #Timeout if not interrupted by timerOn=False mid waiting
+    if timerOn==True:
+        timerOn = False
+        process_timeout()
+
+def send_all_packets_in_window():
         global baseseqnum
         global nextseqnum
         global stopSending
@@ -119,92 +135,78 @@ def launchNode(self_port, peer_port, window_size, emulation_mode, emulation_valu
                 # To let ACK received message displayed first in printer
                 time.sleep(0.006)
                 reserve_printer()
-                print("[%s] packet%d %s sent" % (repr(time.time()), buffer[basebuffer]["sequence"], buffer[basebuffer]["data"]))
+                print("[%s] packet%d %s sent to %s" % (repr(time.time()), buffer[basebuffer]["sequence"], buffer[basebuffer]["data"], peer_port))
                 senderSideSocket.sendto(json.dumps(buffer[basebuffer]), (self_ip, int(peer_port)))
                 release_printer()
                 packetCount=packetCount+1
                 basebuffer = basebuffer+1  
     
-    def send_packets_in_window():
-        global baseseqnum
-        global nextseqnum
-        global stopSending
-        global timerOn
-        endOfWindow=baseseqnum+window_size
-        
-        #print ("in send_packets. next: %d, base: %d, window: %d, bufferLength: %d" %(nextseqnum,baseseqnum,window_size,bufferLength))
-        while ((nextseqnum < bufferLength) and (nextseqnum < endOfWindow) ):
-                #Adding if to defuse list index out of range bug
-                if buffer[nextseqnum]["Acked"]=="":
-                    buffer[nextseqnum]["Acked"]="no"
-                    #print buffer[nextseqnum]
-                    
-                    #To let ACK message received display first in printer
-                    time.sleep(0.006)
-                    #printnextsequence = buffer[nextseqnum]["sequence"]
-                    #printnextdata = buffer[nextseqnum]["data"]
-                    #if nextseqnum < bufferLength:  
-                    reserve_printer()
-                    #print "base in send", baseseqnum
-                    #print "next in send", nextseqnum
-                    #print ("baseseqnum: %d, nextseqnum: %d, bufferLength: %d,window: %d" %(baseseqnum, nextseqnum, bufferLength, window_size))
-                    print("[%s] packet%d %s sent" % (repr(time.time()), buffer[nextseqnum]["sequence"], buffer[nextseqnum]["data"]))
-                    release_printer()
-                    senderSideSocket.sendto(json.dumps(buffer[nextseqnum]), (self_ip, int(peer_port)))
-                    
-                    #Fixing program not terminating due to timer not timing out bug
-                    if(buffer[nextseqnum]["Acked"]=="no"):
-                        timerOn=False
-                        threadTimer = threading.Thread(target=start_timer)
-                        threadTimer.start()
-                #if(baseseqnum == nextseqnum):
-                if(buffer[baseseqnum]["Acked"]=="no"):
+def send_packets_in_window(peer_port):
+    global baseseqnum
+    global nextseqnum
+    global stopSending
+    global timerOn
+    global window_size
+    endOfWindow=baseseqnum+window_size
+    
+    #print ("in send_packets. next: %d, base: %d, window: %d, bufferLength: %d" %(nextseqnum,baseseqnum,window_size,bufferLength))
+    while ((nextseqnum < bufferLength) and (nextseqnum < endOfWindow) ):
+            #Adding if to defuse list index out of range bug
+            if buffer[nextseqnum]["Acked"]=="":
+                buffer[nextseqnum]["Acked"]="no"
+                #print buffer[nextseqnum]
+                
+                #To let ACK message received display first in printer
+                time.sleep(0.006)
+                #printnextsequence = buffer[nextseqnum]["sequence"]
+                #printnextdata = buffer[nextseqnum]["data"]
+                #if nextseqnum < bufferLength:  
+                reserve_printer()
+                #print "base in send", baseseqnum
+                #print "next in send", nextseqnum
+                #print ("baseseqnum: %d, nextseqnum: %d, bufferLength: %d,window: %d" %(baseseqnum, nextseqnum, bufferLength, window_size))
+                print("[%s] packet%d %s sent to %s" % (repr(time.time()), buffer[nextseqnum]["sequence"], buffer[nextseqnum]["data"], peer_port))
+                release_printer()
+                senderSideSocket.sendto(json.dumps(buffer[nextseqnum]), (self_ip, int(peer_port)))
+                
+                #Fixing program not terminating due to timer not timing out bug
+                if(buffer[nextseqnum]["Acked"]=="no"):
                     timerOn=False
                     threadTimer = threading.Thread(target=start_timer)
                     threadTimer.start()
-                #if nextseqnum < bufferLength:   
-                nextseqnum = nextseqnum + 1  
-                        #time.sleep(0.01)
-                #else:
-                    
-                    #print ("nextseqnum is equal to bufferlength")
-                #    timerOn = False
-
-    def process_timeout():
-        global baseseqnum
-        global bufferLength
-        
-        # Prevent timeout messages on out of boundary packets
-        if baseseqnum<(bufferLength-1):
-            reserve_printer()
-            #print "base after timeout", baseseqnum
-            print ("[%s] packet%d timeout" % (repr(time.time()), baseseqnum)) 
-            release_printer()
-        
-            send_all_packets_in_window()          
-    
-    def start_timer():
-        # Give the message a bit of time to reach the target
-        global timerOn
-        timerOn = True
-        t_start = time.time()
-        t_end = time.time() + 0.5
-
-        while (t_start < t_end and timerOn == True):
-                #reserve_printer()
+            #if(baseseqnum == nextseqnum):
+            if(buffer[baseseqnum]["Acked"]=="no"):
+                timerOn=False
+                threadTimer = threading.Thread(target=start_timer)
+                threadTimer.start()
+            #if nextseqnum < bufferLength:   
+            nextseqnum = nextseqnum + 1  
+                    #time.sleep(0.01)
+            #else:
                 
-                #print "packet%d is in timer: [%s], stop at [%s]" % (pktNum, t_start,t_end)
-                #release_printer()
-                t_start = t_start + .005
-                time.sleep(0.005)
-                #if(timerOn == False):
-                    # Reset buffer
-                #    return True;
+                #print ("nextseqnum is equal to bufferlength")
+            #    timerOn = False
+
+def process_timeout():
+    global baseseqnum
+    global bufferLength
+    
+    # Prevent timeout messages on out of boundary packets
+    if baseseqnum<(bufferLength-1):
+        reserve_printer()
+        #print "base after timeout", baseseqnum
+        print ("[%s] packet%d timeout" % (repr(time.time()), baseseqnum)) 
+        release_printer()
+    
+        send_all_packets_in_window()          
+    
         
-        #Timeout if not interrupted by timerOn=False mid waiting
-        if timerOn==True:
-            timerOn = False
-            process_timeout()
+def launchNode(self_port, peer_port, window_size, emulation_mode, emulation_value,node_type):
+    
+    # Create a UDP datagram socket for the client
+    #senderSideSocket = socket(AF_INET, SOCK_DGRAM)
+    #self_ip = gethostname()
+    #senderSideSocket.bind((self_ip, self_port))          
     
     def process_send():
         global timerOn
@@ -238,7 +240,7 @@ def launchNode(self_port, peer_port, window_size, emulation_mode, emulation_valu
             buffer.append(packetWithHeader)
             extraSpaceCounter+=1
         
-        firstThread = threading.Thread(target=send_packets_in_window)
+        firstThread = threading.Thread(target=send_packets_in_window,args=(peer_port,))
         firstThread.start()
         
         #while stopSending == False:
@@ -249,17 +251,6 @@ def launchNode(self_port, peer_port, window_size, emulation_mode, emulation_valu
     if node_type=="prober":
         process_send()            
     
-###############################################################
-# Command Line Processing
-#
-#
-#
-###############################################################
-
-   
-# Read all arguments into a list, with error handling
-
-#print neighborNodes, isLastNode
 
 def reserve_printer():
     global readyToPrint
@@ -303,7 +294,7 @@ def print_table():
                         
 def send_probe_packets():
     nodeType="prober"
-    emulationValue = 0
+    emulationValue = 0.5
     global clearToSend
     #capture loss rate
     for i in senderNodeList:
@@ -324,7 +315,7 @@ def send_table_to_neighbors():
             release_printer()
 
 # Listen for incoming messages and process them            
-def probe_receiver_processing(probe_message):
+def probe_receiver_processing(probe_message,destination_port):
     senderPort = None
     emulation_mode = "-p"
     emulation_value = 1
@@ -370,11 +361,13 @@ def probe_receiver_processing(probe_message):
             if((int(detPacketCounter) % int(deterministicValue)) == 0):
                 deterministicallyDropped = True
         
+        # Always set Probability to False
+        probabilisticallyDropped = False
         if((deterministicallyDropped==True or probabilisticallyDropped==True) and message["fin"]!="printSummary"):
             if(expectedseqnum==message["sequence"]): 
                 reserve_printer()
                 #print ("modulo: %d, prob drop: %s" %((int(message["sequence"] + 1) % int(deterministicValue)),probabilisticallyDropped))
-                print("[%s] packet%d %s discarded" % (repr(time.time()), message["sequence"], message["data"]))
+                print("[%s] packet%d %s discarded from %s" % (repr(time.time()), message["sequence"], message["data"],senderPort))
                 release_printer()
                 lostPacketCounter=lostPacketCounter+1
                 packetCount=packetCount+1    
@@ -387,7 +380,7 @@ def probe_receiver_processing(probe_message):
                         message["fin"]="printSummary"
                         expectedseqnum=message["sequence"] + 1
                         packetCount=packetCount+1
-                        senderSideSocket.sendto(json.dumps(message), (self_ip, int(peer_port)))
+                        senderSideSocket.sendto(json.dumps(message), (self_ip, int(destination_port)))
                         # Turn off timer
                         if timerOn == True:
                             timerOn = False
@@ -403,6 +396,9 @@ def probe_receiver_processing(probe_message):
                         print ("[Summary] %d/%d packets dropped, loss rate = %s" %(lostPacketCounter,packetCount,format(float(lostPacketCounter)/packetCount,".2f")))
                         release_printer()
                         
+                        emulationValue = float(lostPacketCounter)/packetCount
+                        print ("new node weight: %s" %format(emulationValue,".2f"))
+                        nodeType = "listener"
                         baseseqnum = 0
                         nextseqnum = 0
                         expectedseqnum = 0
@@ -413,7 +409,8 @@ def probe_receiver_processing(probe_message):
                         AckCount = 0
                         buffer = []
                         timerOn = False
-                        process_send()
+                        launchNode(self_port, destination_port, windowSize, emulationMode, emulationValue, nodeType)
+                        #process_send()
 
        
                     #Send ACK
@@ -427,7 +424,7 @@ def probe_receiver_processing(probe_message):
                         receivedSequence = message["sequence"]
                         expectedseqnum = message["sequence"] + 1
                         message["data"] = None
-                        senderSideSocket.sendto(json.dumps(message), (self_ip, int(peer_port)))
+                        senderSideSocket.sendto(json.dumps(message), (self_ip, int(destination_port)))
                         reserve_printer()
                         print("[%s] ACK%d sent, expecting packet%s" % (repr(time.time()), receivedSequence, expectedseqnum))
                         release_printer()
@@ -443,9 +440,9 @@ def probe_receiver_processing(probe_message):
     
                 receivedSequence = message["sequence"]
                 message["data"] = None
-                senderSideSocket.sendto(json.dumps(message), (self_ip, int(peer_port)))
+                senderSideSocket.sendto(json.dumps(message), (self_ip, int(destination_port)))
                 reserve_printer()
-                print("[%s] ACK%d sent, expecting packet%s" % (repr(time.time()), receivedSequence, expectedseqnum))
+                print("[%s] ACK%d sent to %s, expecting packet%s" % (repr(time.time()), receivedSequence, destination_port, expectedseqnum))
                 release_printer()
     
     # SENDER SECTION
@@ -503,6 +500,8 @@ def probe_receiver_processing(probe_message):
                 print ("[Summary] %d/%d packets discarded, loss rate = %s" %(lostPacketCounter,AckCount,format(float(lostPacketCounter)/AckCount,".2f")))
                 release_printer()
                 
+                emulationValue = 0
+                nodeType = "prober"
                 baseseqnum = 0
                 nextseqnum = 0
                 expectedseqnum = 0
@@ -513,7 +512,8 @@ def probe_receiver_processing(probe_message):
                 AckCount = 0
                 buffer = []
                 timerOn = False
-                process_send()
+                launchNode(self_port, destination_port, windowSize, emulationMode, emulationValue, nodeType)
+                #process_send()
                     
             # Emulate packet loss
             elif ((int(message["sequence"]) != 0) and (deterministicallyDropped==True or probabilisticallyDropped==True)):
@@ -524,7 +524,7 @@ def probe_receiver_processing(probe_message):
                 packetCount=packetCount+1
                 AckCount=AckCount+1
                 
-            elif (deterministicallyDropped==False or probabilisticallyDropped == False):
+            elif (deterministicallyDropped==False or sendProbabilisticallyDropped == False):
                 #print "ACK received is %d, Next is: %d, base is: %d" %(message["sequence"],nextseqnum,baseseqnum)
                 if((int(message["sequence"])) == baseseqnum and buffer[baseseqnum]["Acked"]!="yes"): 
                     buffer[baseseqnum]["Acked"]="yes"
@@ -542,7 +542,7 @@ def probe_receiver_processing(probe_message):
                             timerOn=False
                             threadTimer = threading.Thread(target=start_timer)
                             threadTimer.start()
-                            send_packets_in_window()
+                            send_packets_in_window(destination_port)
                         # If first packet is already on it's way but not ACKed, restart timer
                         elif buffer[baseseqnum]["Acked"]=="no":
                             timerOn=False
@@ -573,7 +573,7 @@ def probe_receiver_processing(probe_message):
                             timerOn=False
                             threadTimer = threading.Thread(target=start_timer)
                             threadTimer.start()
-                            send_packets_in_window()
+                            send_packets_in_window(destination_port)
                         elif buffer[baseseqnum]["Acked"]=="no":
                             timerOn=False
                             threadTimer = threading.Thread(target=start_timer)
@@ -606,26 +606,30 @@ def routing_table_receiver_processing():
         
     global sendToNeighbors
     global firstTimeReceiving
-    senderPort = None
     NextHopIsNeighbor=False
     thisNeighborDistance=0
 
     while True:
+        #print "waiting"
         incomingPacket = None
         try:
             incomingPacket, (senderIp, senderPort) = senderSideSocket.recvfrom(1024)
         except:
+            
             time.sleep(0.01)
         
         # Ignores packets sent from self
-        if senderPort == self_port:
+        if senderPort == self_port or senderPort == None:
+            #print "In check:", senderPort
             1;
         
-        # Process table updates according to Bellman-Ford
+        
         elif incomingPacket:
             message = json.loads(incomingPacket)
             #message = incomingPacket
+            #print message
             
+            # Process table updates according to Bellman-Ford
             if type(message) is list:
                 print("[%s] Message received at Node %d from Node %d" %(repr(time.time()), self_port,senderPort))
                 
@@ -694,10 +698,12 @@ def routing_table_receiver_processing():
                     send_table_to_neighbors()
                     
                     #send probes after the network becomes ready
-                    send_probe_packets()
+                    threadReceiver = threading.Thread(target=send_probe_packets)
+                    threadReceiver.start()
                 #print SelfRoutingTable
             else:
-                probe_receiver_processing(message)
+                #print "probe receiving on"
+                probe_receiver_processing(message,senderPort)
     
 initialize_self_table()
 print_table()

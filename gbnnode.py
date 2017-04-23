@@ -462,7 +462,8 @@ def launchNode(self_port, peer_port, window_size, emulation_mode, emulation_valu
         
         if packets == False:
             print("Unknown command.")
-            sys.exit()
+            quit()
+            #sys.exit()
         
         # Put all packets with sequence numbers in the buffer
         for i in packets:

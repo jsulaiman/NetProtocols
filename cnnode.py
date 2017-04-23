@@ -291,9 +291,9 @@ def print_table():
     
     for i in SelfRoutingTable:
         if i["NextHop"]==None:
-            print " - (%s) -> Node %d" %(format(i["Distance"],".1f"),i["TargetNode"])
+            print " - (%s) -> Node %d" %(format(i["Distance"],".2f"),i["TargetNode"])
         else:
-            print " - (%s) -> Node %d; Next hop -> Node %d" %(format(i["Distance"],".1f"),i["TargetNode"],i["NextHop"])
+            print " - (%s) -> Node %d; Next hop -> Node %d" %(format(i["Distance"],".2f"),i["TargetNode"],i["NextHop"])
                         
 def send_probe_packets():
     nodeType="prober"
@@ -426,9 +426,10 @@ def probe_receiver_processing(probe_message,destination_port):
                                 i["TotalPackets"]=i["TotalPackets"]+packetCount
                                 i["TotalDroppedPackets"]=i["TotalDroppedPackets"]+lostPacketCounter
                                 i["Distance"]=round(float(i["TotalDroppedPackets"])/float(i["TotalPackets"]),2)
-                                #print i["Distance"]
+                                print i["Distance"]
                         
                         send_table_to_neighbors()
+                        print_table()
                         #clearToSend = True
                         nodeType = "listener"
                         expectedseqnum = 0
@@ -615,7 +616,12 @@ def probe_receiver_processing(probe_message,destination_port):
         else:
             print ("else in Ack")
 
-
+def five_seconds_DV_update():
+    send_table_to_neighbors()
+    while True:
+        time.sleep(5)
+        send_table_to_neighbors()
+    
 def routing_table_receiver_processing():
     #GBN Variables
     senderPort = None
@@ -725,9 +731,9 @@ def routing_table_receiver_processing():
                 if firstTimeReceiving==True:
                     #print firstTimeReceiving
                     firstTimeReceiving=False
-                    
-                    #send table
-                    send_table_to_neighbors()
+
+                    threadReceiver = threading.Thread(target=five_seconds_DV_update)
+                    threadReceiver.start()
                     
                     #send probes after the network becomes ready
                     threadReceiver = threading.Thread(target=send_probe_packets)

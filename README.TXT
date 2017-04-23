@@ -6,7 +6,7 @@ The following code's purpose is to perform network protocols emulation, specific
 The code is written and runnable with python 2.7.6. It contains three executables:
 gbnnode.py: This executable implements a simple Go-Back-N protocol which is part of the link layer.
 dvnode.py: This executable implements a Distance-Vector Routing algorithm, which is part of the network layer.
-cnnode.py:
+cnnode.py: This executable implements a combined emulator using GBN protocol and Distance Vector Routing algorithm.
 
 
 PROGRAM FEATURES

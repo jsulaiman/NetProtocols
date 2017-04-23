@@ -1,4 +1,6 @@
+===========
 dvnode test:
+============
 [1492244900.77] Node 4444 Routing Table 
  - (0.8) -> Node 2222
  - (0.5) -> Node 3333
@@ -113,8 +115,8 @@ dvnode test:
 [1492244900.787] Message received at Node 3333 from Node 1111
 
 
-
-
+==============
+gbnnode test
 ===========
 Probabilistic Test, 1152 characters.
 Sender: 1111 2222 5 -p 0.1
@@ -193,3 +195,59 @@ Receiver log:
 [1492659716.004] packet7 h received
 [1492659716.004] ACK7 sent, expecting packet8
 [Summary] 0/8 packets dropped, loss rate = 0.00
+
+
+=========
+cnnode test
+==========
+[1492938736.787] Node 4444 Routing Table 
+ - (0.0) -> Node 2222
+ - (0.0) -> Node 3333
+[1492938736.792] Message sent from Node 4444 to Node 2222
+[1492938736.792] Message sent from Node 4444 to Node 3333
+Link to 3333: 14 packets sent, 9 packets lost, loss rate 0.64
+
+[1492938730.637] Node 1111 Routing Table 
+[1492938736.793] Message received at Node 1111 from Node 2222
+[1492938736.793] Node 1111 Routing Table 
+ - (9.0) -> Node 3333; Next hop -> Node 2222
+[1492938736.793] Message sent from Node 1111 to Node 3333
+probing 2222
+[1492938736.794] Message received at Node 1111 from Node 3333
+[1492938736.794] Node 1111 Routing Table 
+ - (9.0) -> Node 3333; Next hop -> Node 2222
+ - (9.0) -> Node 2222; Next hop -> Node 3333
+probing 3333
+[Summary] 0/5 packets discarded, loss rate = 0.00
+[1492938738.609] Message received at Node 1111 from Node 3333
+
+[1492938733.228] Node 2222 Routing Table 
+ - (0.0) -> Node 1111
+[1492938736.792] Message received at Node 2222 from Node 4444
+[1492938736.793] Node 2222 Routing Table 
+ - (0.0) -> Node 1111
+ - (9.0) -> Node 3333; Next hop -> Node 4444
+[1492938736.793] Message sent from Node 2222 to Node 1111
+[1492938736.793] Message sent from Node 2222 to Node 3333
+probing 3333
+[1492938736.793] Message received at Node 2222 from Node 3333
+probing 4444
+[1492938738.602] Message received at Node 2222 from Node 3333
+[1492938742.364] Message received at Node 2222 from Node 4444
+
+[1492938735.175] Node 3333 Routing Table 
+ - (0.0) -> Node 1111
+ - (0.0) -> Node 2222
+[1492938736.793] Message received at Node 3333 from Node 4444
+[1492938736.793] Message sent from Node 3333 to Node 1111
+[1492938736.793] Message sent from Node 3333 to Node 2222
+probing 4444
+[1492938736.794] Message received at Node 3333 from Node 2222
+[1492938736.794] Message received at Node 3333 from Node 1111
+Link to 1111: 31 packets sent, 0 packets lost, loss rate 0.00
+[1492938738.6] Message sent from Node 3333 to Node 1111
+[1492938738.601] Message sent from Node 3333 to Node 2222
+[Summary] 0/5 packets discarded, loss rate = 0.00
+[1492938742.385] Message received at Node 3333 from Node 4444
+
+

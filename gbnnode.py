@@ -154,6 +154,7 @@ def launchNode(self_port, peer_port, window_size, emulation_mode, emulation_valu
         global timerOn
         timerOn = True
         t_start = time.time()
+        #Timeout set at 500ms
         t_end = time.time() + 0.5
 
         while (t_start < t_end and timerOn == True):
@@ -161,8 +162,8 @@ def launchNode(self_port, peer_port, window_size, emulation_mode, emulation_valu
                 
                 #print "packet%d is in timer: [%s], stop at [%s]" % (pktNum, t_start,t_end)
                 #release_printer()
-                t_start = t_start + .005
-                time.sleep(0.005)
+                t_start = t_start + .01
+                time.sleep(0.01)
                 #if(timerOn == False):
                     # Reset buffer
                 #    return True;

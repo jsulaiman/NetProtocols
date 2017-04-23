@@ -42,13 +42,13 @@ GBNNODE.PY:
 * The packet in gbnnode.py is implemented using a list of dictionaries.
 Each dictionary has two components: the "data" and the "header" . The "data" section of the dictionary contains the 1 character data in the case
 of sender packet, or contains null in the case of a receiver packet. The header contains the following: 1) "sequence" represents the packet header which contains the packet's sequence number.
-The entries are in order to aid the program to figure out packets' order. 2) "Acked" represents whether the packet has been sent "no", or has been acknowledged "yes". 3) "fin", which represents whether
+The entries are in order to aid the program to figure out packets' order. 2) "Acked" represents whether the packet has been sent "no", or has been acknowledged "yes". "Acked" = None means the packet has not been sent. 3) "fin", which represents whether
 the packet is involved in the transmission of the last packet or not.
 * A buffer is a container of the individual data about to be sent
 * A window is specified as a parameter during program launch. This determines the size of the GBN window, which helps ensure reliable data transfer.
 * The program also implements a timer, which will timeout if an expected ACK is not received within 500ms. At a timeout event, every packet in the window
 will be resent, and the timer restarted.
-* The timer starts after the fi
+* The timer starts after the first time the lowest packet number in window is sent, or restarted if sending all packets in the window (including the one having the lowest sequence number)
 * The receiver only sends an ACK when it receives an expected, in-order packet from the receiver. If not, it will do nothing.
 * json is imported to assist in sending and receiving packets in json format
 

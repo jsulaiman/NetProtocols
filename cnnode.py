@@ -25,6 +25,8 @@ stopSending = False
 lostPacketCounter = 0
 packetCount = 0
 AckCount = 0
+totalWeightCount=0
+lostWeightCount=0
 buffer = []
 clearToSend=True
 
@@ -92,7 +94,7 @@ if len(neighborNodes) > 16:
     print ("Too many nodes (maximum 16")
     sys.exit()
 
-def start_timer():
+def start_timer(peer_port):
     # Give the message a bit of time to reach the target
     global timerOn
     timerOn = True
@@ -104,8 +106,8 @@ def start_timer():
             
             #print "packet%d is in timer: [%s], stop at [%s]" % (pktNum, t_start,t_end)
             #release_printer()
-            t_start = t_start + .005
-            time.sleep(0.005)
+            t_start = t_start + .01
+            time.sleep(0.01)
             #if(timerOn == False):
                 # Reset buffer
             #    return True;
@@ -113,20 +115,21 @@ def start_timer():
     #Timeout if not interrupted by timerOn=False mid waiting
     if timerOn==True:
         timerOn = False
-        process_timeout()
+        process_timeout(peer_port)
 
-def send_all_packets_in_window():
+def send_all_packets_in_window(peer_port):
         global baseseqnum
         global nextseqnum
         global stopSending
         global packetCount
+        global totalWeightCount
         basebuffer=baseseqnum
         endWindow=basebuffer+window_size
         
         #if basebuffer < bufferLength:
             #print ("base:%d, next:%d" %(baseseqnum,nextseqnum))
         timerOn=False
-        threadTimer = threading.Thread(target=start_timer)
+        threadTimer = threading.Thread(target=start_timer,args=(peer_port,))
         threadTimer.start()
          
         while ((basebuffer < endWindow) and (basebuffer < bufferLength)):
@@ -138,6 +141,7 @@ def send_all_packets_in_window():
                 print("[%s] packet%d %s sent to %s" % (repr(time.time()), buffer[basebuffer]["sequence"], buffer[basebuffer]["data"], peer_port))
                 senderSideSocket.sendto(json.dumps(buffer[basebuffer]), (self_ip, int(peer_port)))
                 release_printer()
+                totalWeightCount+=1
                 packetCount=packetCount+1
                 basebuffer = basebuffer+1  
     
@@ -147,6 +151,7 @@ def send_packets_in_window(peer_port):
     global stopSending
     global timerOn
     global window_size
+    global totalWeightCount
     endOfWindow=baseseqnum+window_size
     
     #print ("in send_packets. next: %d, base: %d, window: %d, bufferLength: %d" %(nextseqnum,baseseqnum,window_size,bufferLength))
@@ -172,24 +177,26 @@ def send_packets_in_window(peer_port):
                 #Fixing program not terminating due to timer not timing out bug
                 if(buffer[nextseqnum]["Acked"]=="no"):
                     timerOn=False
-                    threadTimer = threading.Thread(target=start_timer)
+                    threadTimer = threading.Thread(target=start_timer,args=(peer_port,))
                     threadTimer.start()
-            #if(baseseqnum == nextseqnum):
+            #Restart timer if it is already on
             if(buffer[baseseqnum]["Acked"]=="no"):
                 timerOn=False
-                threadTimer = threading.Thread(target=start_timer)
+                threadTimer = threading.Thread(target=start_timer,args=(peer_port,))
                 threadTimer.start()
             #if nextseqnum < bufferLength:   
-            nextseqnum = nextseqnum + 1  
+            nextseqnum = nextseqnum + 1 
+            totalWeightCount+=1 
                     #time.sleep(0.01)
             #else:
                 
                 #print ("nextseqnum is equal to bufferlength")
             #    timerOn = False
 
-def process_timeout():
+def process_timeout(port_to_send_timer):
     global baseseqnum
     global bufferLength
+    global lostWeightCount
     
     # Prevent timeout messages on out of boundary packets
     if baseseqnum<(bufferLength-1):
@@ -197,8 +204,9 @@ def process_timeout():
         #print "base after timeout", baseseqnum
         print ("[%s] packet%d timeout" % (repr(time.time()), baseseqnum)) 
         release_printer()
+        lostWeightCount+=1
     
-        send_all_packets_in_window()          
+        send_all_packets_in_window(port_to_send_timer)          
     
         
 def launchNode(self_port, peer_port, window_size, emulation_mode, emulation_value,node_type):
@@ -318,8 +326,9 @@ def send_table_to_neighbors():
 def probe_receiver_processing(probe_message,destination_port):
     senderPort = None
     emulation_mode = "-p"
-    emulation_value = 1
+    emulation_value = float(0.00) #Initialize loss rate to 0
     detPacketCounter = 0
+    newWeightCost=0
     global timerOn
     global baseseqnum
     global nextseqnum
@@ -330,6 +339,9 @@ def probe_receiver_processing(probe_message,destination_port):
     global AckCount
     global buffer
     
+    #Import receiver nodes and weights
+    global neighborProbDistance
+    global neighborNodes
     # Global references to allow for buffer reset
     global stopSending
     global bufferLength
@@ -349,25 +361,33 @@ def probe_receiver_processing(probe_message,destination_port):
     if (message["data"] != None):
         detPacketCounter=detPacketCounter+1
         
+        #look up node weight by destination_port
+        count = 0
+        while count < len(neighborNodes):
+            if int(neighborNodes[count])==int(destination_port):
+                emulation_value=float(neighborProbDistance[count])
+                #print "Node: %s, weight: %s, emul_value: %.5f"%(neighborNodes[count],float(neighborProbDistance[count]),round(emulation_value,3))
+            count+=1
+        
         if emulation_mode == "-p":
             emulProb=float(emulation_value)
             if emulProb > 0:
                 random_number = float(random.random())
                 if random_number < emulProb:
                     probabilisticallyDropped = True
-            
+                    #print ("random number: %s, emulProb: %s" %(random_number,emulProb))
         elif emulation_mode == "-d":
             deterministicValue = emulation_value
             if((int(detPacketCounter) % int(deterministicValue)) == 0):
                 deterministicallyDropped = True
         
         # Always set Probability to False
-        probabilisticallyDropped = False
+        #probabilisticallyDropped = False
         if((deterministicallyDropped==True or probabilisticallyDropped==True) and message["fin"]!="printSummary"):
             if(expectedseqnum==message["sequence"]): 
                 reserve_printer()
                 #print ("modulo: %d, prob drop: %s" %((int(message["sequence"] + 1) % int(deterministicValue)),probabilisticallyDropped))
-                print("[%s] packet%d %s discarded from %s" % (repr(time.time()), message["sequence"], message["data"],senderPort))
+                print("[%s] packet%d %s discarded from %s" % (repr(time.time()), message["sequence"], message["data"],destination_port))
                 release_printer()
                 lostPacketCounter=lostPacketCounter+1
                 packetCount=packetCount+1    
@@ -409,7 +429,7 @@ def probe_receiver_processing(probe_message,destination_port):
                         AckCount = 0
                         buffer = []
                         timerOn = False
-                        launchNode(self_port, destination_port, windowSize, emulationMode, emulationValue, nodeType)
+                        #launchNode(self_port, destination_port, windowSize, emulationMode, emulationValue, nodeType)
                         #process_send()
 
        
@@ -478,9 +498,9 @@ def probe_receiver_processing(probe_message,destination_port):
                                 #timerOn=False
                                 AckGap = AckGap - 1
                                 baseseqnum = baseseqnum + 1
-                                reserve_printer()
-                                print("[%s] ACK%d received, window moves to %d" % (repr(time.time()), (baseseqnum-AckGap), (baseseqnum-AckGap+1)))
-                                release_printer()
+                                #reserve_printer()
+                                #print("[%s] ACK%d received, window moves to %d" % (repr(time.time()), (baseseqnum-AckGap), (baseseqnum-AckGap+1)))
+                                #release_printer()
                                 AckCount=AckCount+1
                         #Now base is current
                 
@@ -490,14 +510,15 @@ def probe_receiver_processing(probe_message,destination_port):
                     AckCount=AckCount+1
                     timerOn = False
                     time.sleep(0.006)
-                    reserve_printer()
-                    print("[%s] ACK%d received, window moves to %d" % (repr(time.time()), message["sequence"], baseseqnum))
-                    release_printer()
+                    #reserve_printer()
+                    #print("[%s] ACK%d received, window moves to %d" % (repr(time.time()), message["sequence"], baseseqnum))
+                    #release_printer()
                     # Turn off timer, let remaining incoming ACKs printed first
-                
+                newWeightCost=float(lostWeightCount/totalWeightCount)
                 time.sleep(1)
                 reserve_printer()
                 print ("[Summary] %d/%d packets discarded, loss rate = %s" %(lostPacketCounter,AckCount,format(float(lostPacketCounter)/AckCount,".2f")))
+                print ("Link to %d: %d packets sent, %d packets lost, loss rate %f" %(totalWeightCount,lostWeightCount,float(lostWeightCount/totalWeightCount)))
                 release_printer()
                 
                 emulationValue = 0
@@ -510,6 +531,8 @@ def probe_receiver_processing(probe_message,destination_port):
                 lostPacketCounter = 0
                 packetCount = 0
                 AckCount = 0
+                totalWeightCount=0
+                lostWeightCount=0
                 buffer = []
                 timerOn = False
                 launchNode(self_port, destination_port, windowSize, emulationMode, emulationValue, nodeType)
@@ -540,13 +563,13 @@ def probe_receiver_processing(probe_message,destination_port):
                         #Timer restart with new window's packets sent
                         if buffer[baseseqnum]["Acked"]=="":
                             timerOn=False
-                            threadTimer = threading.Thread(target=start_timer)
+                            threadTimer = threading.Thread(target=start_timer,args=(destination_port,))
                             threadTimer.start()
                             send_packets_in_window(destination_port)
                         # If first packet is already on it's way but not ACKed, restart timer
                         elif buffer[baseseqnum]["Acked"]=="no":
                             timerOn=False
-                            threadTimer = threading.Thread(target=start_timer)
+                            threadTimer = threading.Thread(target=start_timer,args=(destination_port,))
                             threadTimer.start()
                     
                     #time.sleep(0.01)
@@ -571,12 +594,12 @@ def probe_receiver_processing(probe_message,destination_port):
                         #Now base is current
                         if buffer[baseseqnum]["Acked"]!="":
                             timerOn=False
-                            threadTimer = threading.Thread(target=start_timer)
+                            threadTimer = threading.Thread(target=start_timer,args=(destination_port,))
                             threadTimer.start()
                             send_packets_in_window(destination_port)
                         elif buffer[baseseqnum]["Acked"]=="no":
                             timerOn=False
-                            threadTimer = threading.Thread(target=start_timer)
+                            threadTimer = threading.Thread(target=start_timer,args=(destination_port,))
                             threadTimer.start()
 
 

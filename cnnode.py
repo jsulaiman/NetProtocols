@@ -308,9 +308,9 @@ def send_probe_packets():
         release_printer()
         launchNode(self_port, peerPort, windowSize, emulationMode, emulationValue, nodeType)
         # Complete processing loss rate for 1 node first
-        while clearToSend==False:
-            print ("in waiting")
-            time.sleep(0.05)
+        #while clearToSend==False:
+        #    print ("in waiting")
+        #    time.sleep(0.05)
     #update cost
     
 def send_table_to_neighbors():
@@ -384,8 +384,6 @@ def probe_receiver_processing(probe_message,destination_port):
             if((int(detPacketCounter) % int(deterministicValue)) == 0):
                 deterministicallyDropped = True
         
-        # Always set Probability to False
-        #probabilisticallyDropped = False
         if((deterministicallyDropped==True or ReceiverProbabilisticallyDropped==True) and message["fin"]!="printSummary" and message["fin"]!="yes"):
             if(expectedseqnum==message["sequence"]): 
                 #reserve_printer()
@@ -430,6 +428,7 @@ def probe_receiver_processing(probe_message,destination_port):
                                 i["Distance"]=round(float(i["TotalDroppedPackets"])/float(i["TotalPackets"]),2)
                                 #print i["Distance"]
                         
+                        send_table_to_neighbors()
                         #clearToSend = True
                         nodeType = "listener"
                         expectedseqnum = 0
@@ -525,8 +524,8 @@ def probe_receiver_processing(probe_message,destination_port):
                     # Turn off timer, let remaining incoming ACKs printed first
                 newWeightCost=float(lostWeightCount/totalWeightCount)
                 time.sleep(1)
-                #reserve_printer()
-                #print ("[Summary] %d/%d packets discarded, loss rate = %s" %(lostPacketCounter,AckCount,format(float(lostPacketCounter)/AckCount,".2f")))
+                reserve_printer()
+                print ("[Summary] %d/%d packets discarded, loss rate = %s" %(lostPacketCounter,AckCount,format(float(lostPacketCounter)/AckCount,".2f")))
                 #print ("Link to %d: %d packets sent, %d packets lost, loss rate %f" %(destination_port,totalWeightCount,lostWeightCount,float(lostWeightCount/totalWeightCount)))
                 #release_printer()
                 

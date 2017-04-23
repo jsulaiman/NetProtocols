@@ -227,7 +227,7 @@ def launchNode(self_port, peer_port, window_size, emulation_mode, emulation_valu
         #print("node>"),
         # Listen to keyboard input and process        
         #keyboardInput = raw_input().strip()
-        packets = list("abcdefghij")
+        packets = list("abcde")
 
         
         # Put all packets with sequence numbers in the buffer
@@ -414,12 +414,14 @@ def probe_receiver_processing(probe_message,destination_port):
                         release_printer()
                         
                         time.sleep(1)
-                        reserve_printer()
-                        print ("[Summary] %d/%d packets dropped, loss rate = %s" %(lostPacketCounter,packetCount,format(float(lostPacketCounter)/packetCount,".2f")))
-                        release_printer()
+                        #reserve_printer()
+                        #print ("[Summary] %d/%d packets dropped, loss rate = %s" %(lostPacketCounter,packetCount,format(float(lostPacketCounter)/packetCount,".2f")))
+                        #print ("Link to %d: %d packets sent, %d packets lost, loss rate %f" %(destination_port,packetCount,lostPacketCounter,format(float(lostPacketCounter)/packetCount,".2f")))
+                        #release_printer()
                         
                         emulationValue = float(lostPacketCounter)/packetCount
                         print ("new node weight: %s" %format(emulationValue,".2f"))
+                        print ("Link to %d: %d packets sent, %d packets lost, loss rate %s" %(destination_port,packetCount,lostPacketCounter,format(float(lostPacketCounter)/packetCount,".2f")))
                         nodeType = "listener"
                         baseseqnum = 0
                         nextseqnum = 0
@@ -518,10 +520,10 @@ def probe_receiver_processing(probe_message,destination_port):
                     # Turn off timer, let remaining incoming ACKs printed first
                 newWeightCost=float(lostWeightCount/totalWeightCount)
                 time.sleep(1)
-                reserve_printer()
-                print ("[Summary] %d/%d packets discarded, loss rate = %s" %(lostPacketCounter,AckCount,format(float(lostPacketCounter)/AckCount,".2f")))
-                print ("Link to %d: %d packets sent, %d packets lost, loss rate %f" %(destination_port,totalWeightCount,lostWeightCount,float(lostWeightCount/totalWeightCount)))
-                release_printer()
+                #reserve_printer()
+                #print ("[Summary] %d/%d packets discarded, loss rate = %s" %(lostPacketCounter,AckCount,format(float(lostPacketCounter)/AckCount,".2f")))
+                #print ("Link to %d: %d packets sent, %d packets lost, loss rate %f" %(destination_port,totalWeightCount,lostWeightCount,float(lostWeightCount/totalWeightCount)))
+                #release_printer()
                 
                 emulationValue = 0
                 nodeType = "prober"

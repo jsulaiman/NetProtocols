@@ -232,7 +232,7 @@ def launchNode(self_port, peer_port, window_size, emulation_mode, emulation_valu
                             if((int(detPacketCounter) % int(deterministicValue)) == 0):
                                 deterministicallyDropped = True
                                 
-                        if((deterministicallyDropped==True or probabilisticallyDropped==True) and message["fin"]!="printSummary"):
+                        if((deterministicallyDropped==True or probabilisticallyDropped==True) and message["fin"]!="printSummary" and message["fin"]!="yes"):
                             if(expectedseqnum==message["sequence"]): 
                                 reserve_printer()
                                 #print ("modulo: %d, prob drop: %s" %((int(message["sequence"] + 1) % int(deterministicValue)),probabilisticallyDropped))

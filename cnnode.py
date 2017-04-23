@@ -338,6 +338,8 @@ def probe_receiver_processing(probe_message,destination_port):
     global packetCount
     global AckCount
     global buffer
+    global totalWeightCount
+    global lostWeightCount
     
     #Import receiver nodes and weights
     global neighborProbDistance
@@ -383,11 +385,11 @@ def probe_receiver_processing(probe_message,destination_port):
         
         # Always set Probability to False
         #probabilisticallyDropped = False
-        if((deterministicallyDropped==True or probabilisticallyDropped==True) and message["fin"]!="printSummary"):
+        if((deterministicallyDropped==True or probabilisticallyDropped==True) and message["fin"]!="printSummary" and message["fin"]!="yes"):
             if(expectedseqnum==message["sequence"]): 
                 reserve_printer()
                 #print ("modulo: %d, prob drop: %s" %((int(message["sequence"] + 1) % int(deterministicValue)),probabilisticallyDropped))
-                print("[%s] packet%d %s discarded from %s" % (repr(time.time()), message["sequence"], message["data"],destination_port))
+                print("[%s] packet%d %s discarded from %s. Fin tag is: %s" %(repr(time.time()), message["sequence"], message["data"],destination_port,message["fin"]))
                 release_printer()
                 lostPacketCounter=lostPacketCounter+1
                 packetCount=packetCount+1    
@@ -518,7 +520,7 @@ def probe_receiver_processing(probe_message,destination_port):
                 time.sleep(1)
                 reserve_printer()
                 print ("[Summary] %d/%d packets discarded, loss rate = %s" %(lostPacketCounter,AckCount,format(float(lostPacketCounter)/AckCount,".2f")))
-                print ("Link to %d: %d packets sent, %d packets lost, loss rate %f" %(totalWeightCount,lostWeightCount,float(lostWeightCount/totalWeightCount)))
+                print ("Link to %d: %d packets sent, %d packets lost, loss rate %f" %(destination_port,totalWeightCount,lostWeightCount,float(lostWeightCount/totalWeightCount)))
                 release_printer()
                 
                 emulationValue = 0
@@ -535,7 +537,7 @@ def probe_receiver_processing(probe_message,destination_port):
                 lostWeightCount=0
                 buffer = []
                 timerOn = False
-                launchNode(self_port, destination_port, windowSize, emulationMode, emulationValue, nodeType)
+                #launchNode(self_port, destination_port, windowSize, emulationMode, emulationValue, nodeType)
                 #process_send()
                     
             # Emulate packet loss

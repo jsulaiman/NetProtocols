@@ -7,6 +7,7 @@ import threading
 import os
 import json
 import random
+from platform import release
 
 # A list of global variables to be used throughout the GBN program
 argList = []  # Argument parser
@@ -137,10 +138,10 @@ def send_all_packets_in_window(peer_port):
                     buffer[basebuffer]["Acked"]="no"
                 # To let ACK received message displayed first in printer
                 time.sleep(0.006)
-                reserve_printer()
-                print("[%s] packet%d %s sent to %s" % (repr(time.time()), buffer[basebuffer]["sequence"], buffer[basebuffer]["data"], peer_port))
+                #reserve_printer()
+                #print("[%s] packet%d %s sent to %s" % (repr(time.time()), buffer[basebuffer]["sequence"], buffer[basebuffer]["data"], peer_port))
                 senderSideSocket.sendto(json.dumps(buffer[basebuffer]), (self_ip, int(peer_port)))
-                release_printer()
+                #release_printer()
                 totalWeightCount+=1
                 packetCount=packetCount+1
                 basebuffer = basebuffer+1  
@@ -163,15 +164,9 @@ def send_packets_in_window(peer_port):
                 
                 #To let ACK message received display first in printer
                 time.sleep(0.006)
-                #printnextsequence = buffer[nextseqnum]["sequence"]
-                #printnextdata = buffer[nextseqnum]["data"]
-                #if nextseqnum < bufferLength:  
-                reserve_printer()
-                #print "base in send", baseseqnum
-                #print "next in send", nextseqnum
-                #print ("baseseqnum: %d, nextseqnum: %d, bufferLength: %d,window: %d" %(baseseqnum, nextseqnum, bufferLength, window_size))
-                print("[%s] packet%d %s sent to %s" % (repr(time.time()), buffer[nextseqnum]["sequence"], buffer[nextseqnum]["data"], peer_port))
-                release_printer()
+                #reserve_printer()
+                #print("[%s] packet%d %s sent to %s" % (repr(time.time()), buffer[nextseqnum]["sequence"], buffer[nextseqnum]["data"], peer_port))
+                #release_printer()
                 senderSideSocket.sendto(json.dumps(buffer[nextseqnum]), (self_ip, int(peer_port)))
                 
                 #Fixing program not terminating due to timer not timing out bug
@@ -200,10 +195,10 @@ def process_timeout(port_to_send_timer):
     
     # Prevent timeout messages on out of boundary packets
     if baseseqnum<(bufferLength-1):
-        reserve_printer()
+        #reserve_printer()
         #print "base after timeout", baseseqnum
-        print ("[%s] packet%d timeout" % (repr(time.time()), baseseqnum)) 
-        release_printer()
+        #print ("[%s] packet%d timeout" % (repr(time.time()), baseseqnum)) 
+        #release_printer()
         lostWeightCount+=1
     
         send_all_packets_in_window(port_to_send_timer)          
@@ -211,6 +206,7 @@ def process_timeout(port_to_send_timer):
         
 def launchNode(self_port, peer_port, window_size, emulation_mode, emulation_value,node_type):
     
+    global clearToSend
     # Create a UDP datagram socket for the client
     #senderSideSocket = socket(AF_INET, SOCK_DGRAM)
     #self_ip = gethostname()
@@ -242,7 +238,6 @@ def launchNode(self_port, peer_port, window_size, emulation_mode, emulation_valu
         
         #Add extra spaces after buffer to capture out of order packets
         extraSpaceCounter = 0
-        
         while extraSpaceCounter < 15:
             packetWithHeader = {"sequence": bufferLength, "data": i, "fin": "", "Acked": ""}
             buffer.append(packetWithHeader)
@@ -277,7 +272,7 @@ def release_printer():
 def initialize_self_table():
     for i in neighborNodes:
             #initialize routing Table Structure
-            routingTableStructure = {"TargetNode": 0,"SourceNode":0,"Distance":9, "NextHop": None, "isTargetAndSourceNeighbors": True, "nodeExists": None, "DistToNextHop": 0}
+            routingTableStructure = {"TargetNode": 0,"SourceNode":0,"Distance":9, "NextHop": None, "isTargetAndSourceNeighbors": True, "nodeExists": None, "DistToNextHop": 0, "TotalPackets":0, "TotalDroppedPackets":0}
             
             routingTableStructure["SourceNode"] = self_port
             routingTableStructure["TargetNode"] = int(i)
@@ -302,13 +297,17 @@ def print_table():
                         
 def send_probe_packets():
     nodeType="prober"
-    emulationValue = 0.5
+    emulationValue = 0
     global clearToSend
     #capture loss rate
     for i in senderNodeList:
         clearToSend=False
         peerPort = i
+        reserve_printer()
+        print ("probing %s" %peerPort)
+        release_printer()
         launchNode(self_port, peerPort, windowSize, emulationMode, emulationValue, nodeType)
+        # Complete processing loss rate for 1 node first
         while clearToSend==False:
             time.sleep(0.05)
     #update cost
@@ -344,6 +343,7 @@ def probe_receiver_processing(probe_message,destination_port):
     #Import receiver nodes and weights
     global neighborProbDistance
     global neighborNodes
+    global SelfRoutingTable
     # Global references to allow for buffer reset
     global stopSending
     global bufferLength
@@ -387,10 +387,10 @@ def probe_receiver_processing(probe_message,destination_port):
         #probabilisticallyDropped = False
         if((deterministicallyDropped==True or probabilisticallyDropped==True) and message["fin"]!="printSummary" and message["fin"]!="yes"):
             if(expectedseqnum==message["sequence"]): 
-                reserve_printer()
+                #reserve_printer()
                 #print ("modulo: %d, prob drop: %s" %((int(message["sequence"] + 1) % int(deterministicValue)),probabilisticallyDropped))
-                print("[%s] packet%d %s discarded from %s. Fin tag is: %s" %(repr(time.time()), message["sequence"], message["data"],destination_port,message["fin"]))
-                release_printer()
+                #print("[%s] packet%d %s discarded from %s. Fin tag is: %s" %(repr(time.time()), message["sequence"], message["data"],destination_port,message["fin"]))
+                #release_printer()
                 lostPacketCounter=lostPacketCounter+1
                 packetCount=packetCount+1    
         else:
@@ -408,10 +408,10 @@ def probe_receiver_processing(probe_message,destination_port):
                             timerOn = False
 
                         
-                        reserve_printer()
-                        print("[%s] packet%d %s received" % (repr(time.time()), message["sequence"], lastpacketnum))
-                        print("[%s] ACK%d sent, expecting packet%s" % (repr(time.time()), message["sequence"], expectedseqnum))
-                        release_printer()
+                        #reserve_printer()
+                        #print("[%s] packet%d %s received" % (repr(time.time()), message["sequence"], lastpacketnum))
+                        #print("[%s] ACK%d sent, expecting packet%s" % (repr(time.time()), message["sequence"], expectedseqnum))
+                        #release_printer()
                         
                         time.sleep(1)
                         #reserve_printer()
@@ -420,8 +420,20 @@ def probe_receiver_processing(probe_message,destination_port):
                         #release_printer()
                         
                         emulationValue = float(lostPacketCounter)/packetCount
-                        print ("new node weight: %s" %format(emulationValue,".2f"))
+                        #print ("new node weight: %s" %format(emulationValue,".2f"))
                         print ("Link to %d: %d packets sent, %d packets lost, loss rate %s" %(destination_port,packetCount,lostPacketCounter,format(float(lostPacketCounter)/packetCount,".2f")))
+                        
+                        #Update Self Routing Table with the new counts for the destination node
+                        
+                        for i in SelfRoutingTable:
+                            if i["TargetNode"]==int(destination_port):
+                                #print i["TargetNode"]
+                                i["TotalPackets"]=i["TotalPackets"]+packetCount
+                                i["TotalDroppedPackets"]=i["TotalDroppedPackets"]+lostPacketCounter
+                                i["Distance"]=round(float(i["TotalDroppedPackets"])/float(i["TotalPackets"]),2)
+                                #print i["Distance"]
+                        
+                        clearToSend = True
                         nodeType = "listener"
                         baseseqnum = 0
                         nextseqnum = 0
@@ -439,35 +451,35 @@ def probe_receiver_processing(probe_message,destination_port):
        
                     #Send ACK
                     else:
-                        reserve_printer()
+                        #reserve_printer()
                         #print ("detvalue: %d, modulo: %d, prob drop: %s" %(int(deterministicValue),(int(message["sequence"] + 1) % int(deterministicValue)),probabilisticallyDropped))
-                        print("[%s] packet%d %s received" % (repr(time.time()), message["sequence"], message["data"]))
-                        release_printer()
+                        #print("[%s] packet%d %s received" % (repr(time.time()), message["sequence"], message["data"]))
+                        #release_printer()
                         packetCount=packetCount+1
             
                         receivedSequence = message["sequence"]
                         expectedseqnum = message["sequence"] + 1
                         message["data"] = None
                         senderSideSocket.sendto(json.dumps(message), (self_ip, int(destination_port)))
-                        reserve_printer()
-                        print("[%s] ACK%d sent, expecting packet%s" % (repr(time.time()), receivedSequence, expectedseqnum))
-                        release_printer()
+                        #reserve_printer()
+                        #print("[%s] ACK%d sent, expecting packet%s" % (repr(time.time()), receivedSequence, expectedseqnum))
+                        #release_printer()
             #Ignore out of expectation packets
             elif (message["sequence"]>expectedseqnum): 
                 1;
             else:
-                reserve_printer()
+                #reserve_printer()
                 #print ("detvalue: %d, modulo: %d, prob drop: %s" %(int(deterministicValue),(int(message["sequence"] + 1) % int(deterministicValue)),probabilisticallyDropped))
-                print("[%s] packet%d %s received" % (repr(time.time()), message["sequence"], message["data"]))
-                release_printer()
+                #print("[%s] packet%d %s received" % (repr(time.time()), message["sequence"], message["data"]))
+                #release_printer()
                 packetCount=packetCount+1
     
                 receivedSequence = message["sequence"]
                 message["data"] = None
                 senderSideSocket.sendto(json.dumps(message), (self_ip, int(destination_port)))
-                reserve_printer()
-                print("[%s] ACK%d sent to %s, expecting packet%s" % (repr(time.time()), receivedSequence, destination_port, expectedseqnum))
-                release_printer()
+                #reserve_printer()
+                #print("[%s] ACK%d sent to %s, expecting packet%s" % (repr(time.time()), receivedSequence, destination_port, expectedseqnum))
+                #release_printer()
     
     # SENDER SECTION
     # Process incoming Ack as Sender
@@ -544,9 +556,9 @@ def probe_receiver_processing(probe_message,destination_port):
                     
             # Emulate packet loss
             elif ((int(message["sequence"]) != 0) and (deterministicallyDropped==True or probabilisticallyDropped==True)):
-                reserve_printer()
-                print("[%s] ACK%d discarded" % (repr(time.time()), message["sequence"]))
-                release_printer()
+                #reserve_printer()
+                #print("[%s] ACK%d discarded" % (repr(time.time()), message["sequence"]))
+                #release_printer()
                 lostPacketCounter=lostPacketCounter+1
                 packetCount=packetCount+1
                 AckCount=AckCount+1
@@ -557,9 +569,9 @@ def probe_receiver_processing(probe_message,destination_port):
                     buffer[baseseqnum]["Acked"]="yes"
                     timerOn = False
                     baseseqnum = baseseqnum + 1
-                    reserve_printer()
-                    print("[%s] ACK%d received, window moves to %d" % (repr(time.time()), message["sequence"], baseseqnum))
-                    release_printer()
+                    #reserve_printer()
+                    #print("[%s] ACK%d received, window moves to %d" % (repr(time.time()), message["sequence"], baseseqnum))
+                    #release_printer()
                     
                     #Allow print messages
                     time.sleep(0.006)
@@ -591,9 +603,9 @@ def probe_receiver_processing(probe_message,destination_port):
                             #timerOn=False
                             AckGap = AckGap - 1
                             baseseqnum = baseseqnum + 1
-                            reserve_printer()
-                            print("[%s] ACK%d received, window moves to %d" % (repr(time.time()), (baseseqnum-AckGap), (baseseqnum-AckGap+1)))
-                            release_printer()
+                            #reserve_printer()
+                            #print("[%s] ACK%d received, window moves to %d" % (repr(time.time()), (baseseqnum-AckGap), (baseseqnum-AckGap+1)))
+                            #release_printer()
                             AckCount=AckCount+1
                         #Now base is current
                         if buffer[baseseqnum]["Acked"]!="":
@@ -682,8 +694,8 @@ def routing_table_receiver_processing():
                         1;
                     # Add new node to SelfRoutingTable, set distance to maximum
                     elif i["nodeExists"]==False:
-                        
-                        routingTableStructure = {"TargetNode": 0,"SourceNode":0,"Distance":9, "NextHop": None, "isTargetAndSourceNeighbors": False, "nodeExists": None, "DistToNextHop": 0}
+                        routingTableStructure = {"TargetNode": 0,"SourceNode":0,"Distance":9, "NextHop": None, "isTargetAndSourceNeighbors": True, "nodeExists": None, "DistToNextHop": 0, "TotalPackets":0, "TotalDroppedPackets":0}
+                        #routingTableStructure = {"TargetNode": 0,"SourceNode":0,"Distance":9, "NextHop": None, "isTargetAndSourceNeighbors": False, "nodeExists": None, "DistToNextHop": 0}
                         
                         routingTableStructure["SourceNode"] = self_port
                         routingTableStructure["TargetNode"] = int(i["TargetNode"])

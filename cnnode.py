@@ -426,7 +426,7 @@ def probe_receiver_processing(probe_message,destination_port):
                                 i["TotalPackets"]=i["TotalPackets"]+packetCount
                                 i["TotalDroppedPackets"]=i["TotalDroppedPackets"]+lostPacketCounter
                                 i["Distance"]=round(float(i["TotalDroppedPackets"])/float(i["TotalPackets"]),2)
-                                print i["Distance"]
+                                #print i["Distance"]
                         
                         send_table_to_neighbors()
                         print_table()
@@ -545,7 +545,7 @@ def probe_receiver_processing(probe_message,destination_port):
                 lostWeightCount=0
                 buffer = []
                 timerOn = False
-                #launchNode(self_port, destination_port, windowSize, emulationMode, emulationValue, nodeType)
+                launchNode(self_port, destination_port, windowSize, emulationMode, emulationValue, nodeType)
                 #process_send()
                     
             # Emulate packet loss

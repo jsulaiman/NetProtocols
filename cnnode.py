@@ -309,6 +309,7 @@ def send_probe_packets():
         launchNode(self_port, peerPort, windowSize, emulationMode, emulationValue, nodeType)
         # Complete processing loss rate for 1 node first
         while clearToSend==False:
+            print ("in waiting")
             time.sleep(0.05)
     #update cost
     
@@ -354,7 +355,7 @@ def probe_receiver_processing(probe_message,destination_port):
     #print ("in get_message, capturing incoming msg", message)
     # Check if it is a packet containing acknowledgment of a previously sent packet    
     
-    probabilisticallyDropped = False
+    ReceiverProbabilisticallyDropped = False
     deterministicallyDropped = False
     deterministicValue = 9999999999999999999 #Ensure that modulo of this number is always going to be a non zero
         
@@ -376,7 +377,7 @@ def probe_receiver_processing(probe_message,destination_port):
             if emulProb > 0:
                 random_number = float(random.random())
                 if random_number < emulProb:
-                    probabilisticallyDropped = True
+                    ReceiverProbabilisticallyDropped = True
                     #print ("random number: %s, emulProb: %s" %(random_number,emulProb))
         elif emulation_mode == "-d":
             deterministicValue = emulation_value
@@ -385,7 +386,7 @@ def probe_receiver_processing(probe_message,destination_port):
         
         # Always set Probability to False
         #probabilisticallyDropped = False
-        if((deterministicallyDropped==True or probabilisticallyDropped==True) and message["fin"]!="printSummary" and message["fin"]!="yes"):
+        if((deterministicallyDropped==True or ReceiverProbabilisticallyDropped==True) and message["fin"]!="printSummary" and message["fin"]!="yes"):
             if(expectedseqnum==message["sequence"]): 
                 #reserve_printer()
                 #print ("modulo: %d, prob drop: %s" %((int(message["sequence"] + 1) % int(deterministicValue)),probabilisticallyDropped))
@@ -403,11 +404,7 @@ def probe_receiver_processing(probe_message,destination_port):
                         expectedseqnum=message["sequence"] + 1
                         packetCount=packetCount+1
                         senderSideSocket.sendto(json.dumps(message), (self_ip, int(destination_port)))
-                        # Turn off timer
-                        if timerOn == True:
-                            timerOn = False
 
-                        
                         #reserve_printer()
                         #print("[%s] packet%d %s received" % (repr(time.time()), message["sequence"], lastpacketnum))
                         #print("[%s] ACK%d sent, expecting packet%s" % (repr(time.time()), message["sequence"], expectedseqnum))
@@ -433,18 +430,14 @@ def probe_receiver_processing(probe_message,destination_port):
                                 i["Distance"]=round(float(i["TotalDroppedPackets"])/float(i["TotalPackets"]),2)
                                 #print i["Distance"]
                         
-                        clearToSend = True
+                        #clearToSend = True
                         nodeType = "listener"
-                        baseseqnum = 0
-                        nextseqnum = 0
                         expectedseqnum = 0
-                        bufferLength = 0
                         stopSending = False
                         lostPacketCounter = 0
                         packetCount = 0
-                        AckCount = 0
-                        buffer = []
-                        timerOn = False
+                        #AckCount = 0
+
                         #launchNode(self_port, destination_port, windowSize, emulationMode, emulationValue, nodeType)
                         #process_send()
 
@@ -537,6 +530,7 @@ def probe_receiver_processing(probe_message,destination_port):
                 #print ("Link to %d: %d packets sent, %d packets lost, loss rate %f" %(destination_port,totalWeightCount,lostWeightCount,float(lostWeightCount/totalWeightCount)))
                 #release_printer()
                 
+                clearToSend=True
                 emulationValue = 0
                 nodeType = "prober"
                 baseseqnum = 0
@@ -555,14 +549,14 @@ def probe_receiver_processing(probe_message,destination_port):
                 #process_send()
                     
             # Emulate packet loss
-            elif ((int(message["sequence"]) != 0) and (deterministicallyDropped==True or probabilisticallyDropped==True)):
+            elif ((int(message["sequence"]) != 0) and (deterministicallyDropped==True or sendProbabilisticallyDropped==True)):
                 #reserve_printer()
                 #print("[%s] ACK%d discarded" % (repr(time.time()), message["sequence"]))
                 #release_printer()
-                lostPacketCounter=lostPacketCounter+1
-                packetCount=packetCount+1
-                AckCount=AckCount+1
-                
+                #lostPacketCounter=lostPacketCounter+1
+                #packetCount=packetCount+1
+                #AckCount=AckCount+1
+                1;
             elif (deterministicallyDropped==False or sendProbabilisticallyDropped == False):
                 #print "ACK received is %d, Next is: %d, base is: %d" %(message["sequence"],nextseqnum,baseseqnum)
                 if((int(message["sequence"])) == baseseqnum and buffer[baseseqnum]["Acked"]!="yes"): 

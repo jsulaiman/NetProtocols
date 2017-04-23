@@ -251,8 +251,8 @@ def launchNode(self_port, peer_port, window_size, emulation_mode, emulation_valu
                                         packetCount=packetCount+1
                                         senderSideSocket.sendto(json.dumps(message), (self_ip, int(peer_port)))
                                         # Turn off timer
-                                        if timerOn == True:
-                                            timerOn = False
+                                        #if timerOn == True:
+                                        #    timerOn = False
 
                                         
                                         reserve_printer()
